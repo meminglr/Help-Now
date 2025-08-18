@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "604963624688",
+    "project_id": "helpnow-cc592",
+    "storage_bucket": "helpnow-cc592.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:604963624688:android:9887f4e537bfa6176f1435",
+        "android_client_info": {
+          "package_name": "com.example.help_now"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA4HOMPK26WhBohB1lEoIIBks2Osj2dqtk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
