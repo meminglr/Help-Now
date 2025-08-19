@@ -1,5 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:help_now/features/auth/view/register_screen.dart';
+import 'package:help_now/features/auth/view/sign_in.dart';
 import 'package:help_now/firebase_options.dart';
 
 void main() async {
@@ -20,7 +22,12 @@ class MainApp extends StatelessWidget {
         
         useMaterial3: true,
       ),
-      home: Scaffold(body: Center(child: Text('Hello World!'))),
+      routes: {
+        '/login': (context) => LoginScreen(),
+        '/register': (context) => RegisterScreen(),
+      },
+      home: LoginScreen(),
     );
+    
   }
 }
