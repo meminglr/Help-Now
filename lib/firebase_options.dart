@@ -85,4 +85,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'helpnow-cc592.firebasestorage.app',
     measurementId: 'G-0JLC9TYBM0',
   );
+
 }
