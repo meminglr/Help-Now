@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../services/auth_service.dart';
 import '../models/user.dart';
 import 'ihtiyac_bildirim_screen.dart';
+import 'harita_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   final AuthService _authService = AuthService();
@@ -39,18 +40,27 @@ class HomeScreen extends StatelessWidget {
                 Text('Hoş Geldiniz, ${user.email}!'),
                 Text('Rolünüz: ${user.role}'),
                 SizedBox(height: 20),
+                if (user.role == 'depremzede')
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => IhtiyacBildirimScreen(),
+                        ),
+                      );
+                    },
+                    child: Text('İhtiyaç Bildir'),
+                  ),
+                SizedBox(height: 10),
                 ElevatedButton(
-                  onPressed: user.role == 'depremzede'
-                      ? () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => IhtiyacBildirimScreen(),
-                            ),
-                          );
-                        }
-                      : null,
-                  child: Text('İhtiyaç Bildir'),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => HaritaScreen()),
+                    );
+                  },
+                  child: Text('Haritayı Görüntüle'),
                 ),
               ],
             ),
