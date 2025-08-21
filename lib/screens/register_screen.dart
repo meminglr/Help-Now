@@ -92,12 +92,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           if (_formKey.currentState!.validate()) {
                             setState(() => _isLoading = true);
                             try {
-                              AppUser? user = await _authService
-                                  .registerWithEmail(
-                                    _emailController.text,
-                                    _passwordController.text,
-                                    _selectedRole!,
-                                  );
+                              AppUser? user = await _authService.signUp(
+                                _emailController.text,
+                                _passwordController.text,
+                                _selectedRole!,
+                              );
                               if (user != null) {
                                 Navigator.pushReplacementNamed(
                                   context,

@@ -1,6 +1,4 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import '../models/user.dart';
 import '../services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -9,85 +7,78 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
   final AuthService _authService = AuthService();
   final _formKey = GlobalKey<FormState>();
-  bool _isLoading = false; // Yükleme göstergesi için durum
+  String _email = '';
+  String _password = '';
+  bool _isLoading = false;
+  String? _errorMessage;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Giriş Yap')),
-      body: SingleChildScrollView(
-        // Klavye ile kaydırma için
-        child: Padding(
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: SingleChildScrollView(
           padding: EdgeInsets.all(16.0),
           child: Form(
             key: _formKey,
             child: Column(
               children: [
                 TextFormField(
-                  controller: _emailController,
                   decoration: InputDecoration(labelText: 'E-posta'),
                   keyboardType: TextInputType.emailAddress,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'E-posta girin';
-                    }
-                    if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-                      return 'Geçerli bir e-posta girin';
-                    }
-                    return null;
-                  },
+                  onChanged: (value) => _email = value,
+                  validator: (value) => value!.isEmpty ? 'E-posta girin' : null,
                 ),
+                SizedBox(height: 16),
                 TextFormField(
-                  controller: _passwordController,
                   decoration: InputDecoration(labelText: 'Şifre'),
                   obscureText: true,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Şifre girin';
-                    }
-                    return null;
-                  },
+                  onChanged: (value) => _password = value,
+                  validator: (value) => value!.isEmpty ? 'Şifre girin' : null,
                 ),
                 SizedBox(height: 20),
+                if (_errorMessage != null)
+                  Padding(
+                    padding: EdgeInsets.only(bottom: 16.0),
+                    child: Text(
+                      _errorMessage!,
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  ),
                 ElevatedButton(
                   onPressed: _isLoading
                       ? null
                       : () async {
                           if (_formKey.currentState!.validate()) {
-                            setState(() => _isLoading = true);
+                            setState(() {
+                              _isLoading = true;
+                              _errorMessage = null;
+                            });
                             try {
-                              AppUser? user = await _authService.loginWithEmail(
-                                _emailController.text,
-                                _passwordController.text,
+                              final user = await _authService.signIn(
+                                _email,
+                                _password,
                               );
                               if (user != null) {
                                 Navigator.pushReplacementNamed(
                                   context,
-                                  '/home',
+                                  '/main',
                                 );
                               } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Giriş başarısız!')),
-                                );
+                                setState(() {
+                                  _errorMessage = 'Kullanıcı bulunamadı';
+                                });
                               }
                             } catch (e) {
-                              String errorMessage = 'Bilinmeyen hata';
-                              if (e is FirebaseAuthException) {
-                                if (e.code == 'user-not-found') {
-                                  errorMessage = 'Kullanıcı bulunamadı';
-                                } else if (e.code == 'wrong-password') {
-                                  errorMessage = 'Yanlış şifre';
-                                } else if (e.code == 'invalid-email') {
-                                  errorMessage = 'Geçersiz e-posta adresi';
-                                }
-                              }
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(errorMessage)),
-                              );
+                              setState(() {
+                                _errorMessage = e.toString().replaceFirst(
+                                  'Exception: ',
+                                  '',
+                                );
+                              });
                             } finally {
                               setState(() => _isLoading = false);
                             }
@@ -98,12 +89,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       : Text('Giriş Yap'),
                 ),
                 TextButton(
-                  onPressed: _isLoading
-                      ? null
-                      : () {
-                          Navigator.pushNamed(context, '/register');
-                        },
-                  child: Text('Hesabın yok mu? Kayıt ol'),
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/register');
+                  },
+                  child: Text('Hesabınız yok mu? Kayıt olun'),
                 ),
               ],
             ),

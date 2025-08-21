@@ -4,9 +4,14 @@ service cloud.firestore {
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
-    match /ihtiyaclar/{document=**} {
+    match /ihtiyaclar/{ihtiyacId} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == resource.data.userId;
+      allow update, delete: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'kurum';
+    }
+    match /teklifler/{teklifId} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == resource.data.gonulluId;
     }
   }
 }

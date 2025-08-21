@@ -2,22 +2,30 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../services/auth_service.dart';
 import '../models/user.dart';
-import 'ihtiyac_bildirim_screen.dart';
-import 'harita_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen>
+    with AutomaticKeepAliveClientMixin {
   final AuthService _authService = AuthService();
 
   @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context); // AutomaticKeepAliveClientMixin için gerekli
     return StreamBuilder<AppUser?>(
       stream: _authService.user,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Scaffold(body: Center(child: CircularProgressIndicator()));
+          return Center(child: CircularProgressIndicator());
         }
         if (!snapshot.hasData) {
-          return Scaffold(body: Center(child: Text('Kullanıcı bulunamadı')));
+          return Center(child: Text('Kullanıcı bulunamadı'));
         }
         final user = snapshot.data!;
         return Scaffold(
@@ -39,29 +47,6 @@ class HomeScreen extends StatelessWidget {
               children: [
                 Text('Hoş Geldiniz, ${user.email}!'),
                 Text('Rolünüz: ${user.role}'),
-                SizedBox(height: 20),
-                if (user.role == 'depremzede')
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => IhtiyacBildirimScreen(),
-                        ),
-                      );
-                    },
-                    child: Text('İhtiyaç Bildir'),
-                  ),
-                SizedBox(height: 10),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => HaritaScreen()),
-                    );
-                  },
-                  child: Text('Haritayı Görüntüle'),
-                ),
               ],
             ),
           ),
