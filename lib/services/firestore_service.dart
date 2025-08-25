@@ -6,9 +6,6 @@ class FirestoreService {
   final CollectionReference _ihtiyaclar = FirebaseFirestore.instance.collection(
     'ihtiyaclar',
   );
-  final CollectionReference _teklifler = FirebaseFirestore.instance.collection(
-    'teklifler',
-  );
   final CollectionReference _users = FirebaseFirestore.instance.collection(
     'users',
   );
@@ -67,16 +64,6 @@ class FirestoreService {
     await _ihtiyaclar.doc(ihtiyacId).delete();
   }
 
-  // Teklif ekleme
-  /* Future<void> addTeklif(Teklif teklif) async {
-    await _teklifler.doc(teklif.id).set({
-      'ihtiyacId': teklif.ihtiyacId,
-      'gonulluId': teklif.gonulluId,
-      'aciklama': teklif.aciklama,
-      'timestamp': teklif.timestamp,
-    });
-  } */
-
   // Eksik envanter isteği ekleme
   Future<void> addEksikIstek(
     String ihtiyacId,
@@ -108,9 +95,34 @@ class FirestoreService {
     );
   }
 
-  // Eksik isteği güncelleme
-  Future<void> updateEksikIstekDurum(String istekId, String durum) async {
+  // Eksik isteği güncelleme ve envanteri artırma
+  Future<void> updateEksikIstekDurum(
+    String istekId,
+    String durum, {
+    Map<String, int>? eksikUrunler,
+  }) async {
     await _eksikIstekler.doc(istekId).update({'durum': durum});
+    if (durum == 'onaylandı' && eksikUrunler != null) {
+      for (var entry in eksikUrunler.entries) {
+        final itemSnapshot = await _envanter.doc(entry.key).get();
+        if (itemSnapshot.exists) {
+          final currentMiktar =
+              (itemSnapshot.data() as Map<String, dynamic>)['miktar'] as int;
+          await updateEnvanterMiktar(entry.key, currentMiktar + entry.value);
+        } else {
+          // Ürün yoksa yeni ekle
+          await addEnvanterItem(
+            EnvanterItem(
+              id: entry.key,
+              ad: entry.key.replaceAll('_', ' ').toUpperCase(),
+              miktar: entry.value,
+            ),
+          );
+        }
+      }
+      // İlgili ihtiyacı tekrar beklemede durumuna al
+      await updateIhtiyacDurum(istekId, 'beklemede');
+    }
   }
 
   // Kullanıcı profili güncelleme

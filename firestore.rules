@@ -12,7 +12,7 @@ service cloud.firestore {
     }
     match /envanter/{itemId} {
       allow read: if true;
-      allow write, update: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'kurum';
+      allow write, update: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['gonullu', 'kurum'];
     }
     match /eksik_istekler/{istekId} {
       allow read: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['gonullu', 'kurum'];

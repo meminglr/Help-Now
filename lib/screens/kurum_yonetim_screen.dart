@@ -55,9 +55,14 @@ class _KurumYonetimScreenState extends State<KurumYonetimScreen>
                                 await _firestoreService.updateEksikIstekDurum(
                                   istek['id'],
                                   'onaylandı',
+                                  eksikUrunler: istek['eksikUrunler'],
                                 );
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('İstek onaylandı')),
+                                  SnackBar(
+                                    content: Text(
+                                      'İstek onaylandı ve envanter güncellendi',
+                                    ),
+                                  ),
                                 );
                               } catch (e) {
                                 ScaffoldMessenger.of(context).showSnackBar(
