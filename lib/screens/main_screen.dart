@@ -6,6 +6,8 @@ import 'home_screen.dart';
 import 'ihtiyac_bildirim_screen.dart';
 import 'harita_screen.dart';
 import 'kurum_yonetim_screen.dart';
+import 'profile_screen.dart';
+import 'gonullu_onay_screen.dart';
 
 class MainScreen extends StatefulWidget {
   @override
@@ -28,7 +30,7 @@ class _MainScreenState extends State<MainScreen> {
 
   Future<void> _loadUserData() async {
     try {
-      final user = await _authService.user.first; // Stream’den bir kez veri al
+      final user = await _authService.user.first;
       if (user == null) {
         Navigator.pushReplacementNamed(context, '/login');
         return;
@@ -38,8 +40,10 @@ class _MainScreenState extends State<MainScreen> {
         _screens = [
           HomeScreen(),
           if (user.role == 'depremzede') IhtiyacBildirimScreen(),
-          HaritaScreen(),
+          if (user.role != 'depremzede') HaritaScreen(),
+          if (user.role == 'gonullu') GonulluOnayScreen(),
           if (user.role == 'kurum') KurumYonetimScreen(),
+          ProfileScreen(),
         ];
         _items = [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Ana Sayfa'),
@@ -48,12 +52,19 @@ class _MainScreenState extends State<MainScreen> {
               icon: Icon(Icons.add_alert),
               label: 'İhtiyaç Bildir',
             ),
-          BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Harita'),
+          if (user.role != 'depremzede')
+            BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Harita'),
+          if (user.role == 'gonullu')
+            BottomNavigationBarItem(
+              icon: Icon(Icons.check_circle),
+              label: 'Onaylama',
+            ),
           if (user.role == 'kurum')
             BottomNavigationBarItem(
               icon: Icon(Icons.admin_panel_settings),
               label: 'Yönetim',
             ),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
         ];
         _isLoading = false;
       });
@@ -92,8 +103,7 @@ class _MainScreenState extends State<MainScreen> {
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.blue,
         unselectedItemColor: Colors.grey,
-        type:
-            BottomNavigationBarType.fixed, // Sekme animasyonlarını sabit tutar
+        type: BottomNavigationBarType.fixed,
         onTap: (index) {
           setState(() {
             _selectedIndex = index;

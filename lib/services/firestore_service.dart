@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/ihtiyac.dart';
-import '../models/teklif.dart';
+import '../models/envanter.dart';
 
 class FirestoreService {
   final CollectionReference _ihtiyaclar = FirebaseFirestore.instance.collection(
@@ -9,65 +9,112 @@ class FirestoreService {
   final CollectionReference _teklifler = FirebaseFirestore.instance.collection(
     'teklifler',
   );
+  final CollectionReference _users = FirebaseFirestore.instance.collection(
+    'users',
+  );
+  final CollectionReference _envanter = FirebaseFirestore.instance.collection(
+    'envanter',
+  );
+  final CollectionReference _eksikIstekler = FirebaseFirestore.instance
+      .collection('eksik_istekler');
 
-  // İhtiyacı Firestore’a kaydet
-  Future<void> addIhtiyac(Ihtiyac ihtiyac) async {
-    try {
-      await _ihtiyaclar.doc(ihtiyac.id).set(ihtiyac.toMap());
-    } catch (e) {
-      print('İhtiyaç kaydetme hatası: $e');
-      rethrow;
-    }
+  // Envanter işlemleri
+  Future<void> addEnvanterItem(EnvanterItem item) async {
+    await _envanter.doc(item.id).set(item.toMap());
   }
 
-  // İhtiyaçları anlık olarak çek
-  Stream<List<Ihtiyac>> getIhtiyaclar() {
-    return _ihtiyaclar.snapshots().map(
+  Stream<List<EnvanterItem>> getEnvanter() {
+    return _envanter.snapshots().map(
       (snapshot) => snapshot.docs
-          .map((doc) => Ihtiyac.fromMap(doc.data() as Map<String, dynamic>))
+          .map(
+            (doc) => EnvanterItem.fromMap(
+              doc.data() as Map<String, dynamic>,
+              doc.id,
+            ),
+          )
           .toList(),
     );
   }
 
-  // İhtiyacın durumunu güncelle (kurumlar için)
-  Future<void> updateIhtiyacDurum(String ihtiyacId, String yeniDurum) async {
-    try {
-      await _ihtiyaclar.doc(ihtiyacId).update({'durum': yeniDurum});
-    } catch (e) {
-      print('İhtiyaç durumu güncelleme hatası: $e');
-      rethrow;
-    }
+  Future<void> updateEnvanterMiktar(String itemId, int yeniMiktar) async {
+    await _envanter.doc(itemId).update({'miktar': yeniMiktar});
   }
 
-  // İhtiyacı sil (kurumlar için)
+  // İhtiyaç ekleme
+  Future<void> addIhtiyac(Ihtiyac ihtiyac) async {
+    await _ihtiyaclar.doc(ihtiyac.id).set(ihtiyac.toMap());
+  }
+
+  // İhtiyaçları alma
+  Stream<List<Ihtiyac>> getIhtiyaclar() {
+    return _ihtiyaclar.snapshots().map(
+      (snapshot) => snapshot.docs
+          .map(
+            (doc) =>
+                Ihtiyac.fromMap(doc.data() as Map<String, dynamic>, doc.id),
+          )
+          .toList(),
+    );
+  }
+
+  // İhtiyaç durumunu güncelleme
+  Future<void> updateIhtiyacDurum(String ihtiyacId, String durum) async {
+    await _ihtiyaclar.doc(ihtiyacId).update({'durum': durum});
+  }
+
+  // İhtiyacı silme
   Future<void> deleteIhtiyac(String ihtiyacId) async {
-    try {
-      await _ihtiyaclar.doc(ihtiyacId).delete();
-    } catch (e) {
-      print('İhtiyaç silme hatası: $e');
-      rethrow;
-    }
+    await _ihtiyaclar.doc(ihtiyacId).delete();
   }
 
-  // Teklifi Firestore’a kaydet
-  Future<void> addTeklif(Teklif teklif) async {
-    try {
-      await _teklifler.doc(teklif.id).set(teklif.toMap());
-    } catch (e) {
-      print('Teklif kaydetme hatası: $e');
-      rethrow;
-    }
+  // Teklif ekleme
+  /* Future<void> addTeklif(Teklif teklif) async {
+    await _teklifler.doc(teklif.id).set({
+      'ihtiyacId': teklif.ihtiyacId,
+      'gonulluId': teklif.gonulluId,
+      'aciklama': teklif.aciklama,
+      'timestamp': teklif.timestamp,
+    });
+  } */
+
+  // Eksik envanter isteği ekleme
+  Future<void> addEksikIstek(
+    String ihtiyacId,
+    Map<String, int> eksikUrunler,
+  ) async {
+    await _eksikIstekler.doc(ihtiyacId).set({
+      'ihtiyacId': ihtiyacId,
+      'eksikUrunler': eksikUrunler,
+      'durum': 'beklemede',
+      'timestamp': DateTime.now(),
+    });
   }
 
-  // Teklifleri anlık olarak çek
-  Stream<List<Teklif>> getTeklifler(String ihtiyacId) {
-    return _teklifler
-        .where('ihtiyacId', isEqualTo: ihtiyacId)
-        .snapshots()
-        .map(
-          (snapshot) => snapshot.docs
-              .map((doc) => Teklif.fromMap(doc.data() as Map<String, dynamic>))
-              .toList(),
-        );
+  // Eksik istekleri alma
+  Stream<List<Map<String, dynamic>>> getEksikIstekler() {
+    return _eksikIstekler.snapshots().map(
+      (snapshot) => snapshot.docs
+          .map(
+            (doc) => {
+              'id': doc.id,
+              'ihtiyacId': doc['ihtiyacId'],
+              'eksikUrunler': Map<String, int>.from(doc['eksikUrunler'] ?? {}),
+              'durum': doc['durum'] ?? 'beklemede',
+              'timestamp':
+                  (doc['timestamp'] as Timestamp?)?.toDate() ?? DateTime.now(),
+            },
+          )
+          .toList(),
+    );
+  }
+
+  // Eksik isteği güncelleme
+  Future<void> updateEksikIstekDurum(String istekId, String durum) async {
+    await _eksikIstekler.doc(istekId).update({'durum': durum});
+  }
+
+  // Kullanıcı profili güncelleme
+  Future<void> updateUserProfile(String uid, Map<String, dynamic> data) async {
+    await _users.doc(uid).update(data);
   }
 }

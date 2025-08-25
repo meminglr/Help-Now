@@ -7,11 +7,18 @@ service cloud.firestore {
     match /ihtiyaclar/{ihtiyacId} {
       allow read: if true;
       allow write: if request.auth != null && request.auth.uid == resource.data.userId;
-      allow update, delete: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'kurum';
+      allow update: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'gonullu';
+      allow delete: if false;
     }
-    match /teklifler/{teklifId} {
+    match /envanter/{itemId} {
       allow read: if true;
-      allow write: if request.auth != null && request.auth.uid == resource.data.gonulluId;
+      allow write, update: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'kurum';
+    }
+    match /eksik_istekler/{istekId} {
+      allow read: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['gonullu', 'kurum'];
+      allow write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'gonullu';
+      allow update: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'kurum';
+      allow delete: if false;
     }
   }
 }

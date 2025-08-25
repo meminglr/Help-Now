@@ -25,6 +25,8 @@ class AuthService {
         uid: firebaseUser.uid,
         email: firebaseUser.email ?? '',
         role: data['role'] ?? '',
+        name: data['name'],
+        phone: data['phone'],
       );
     });
   }
@@ -46,6 +48,8 @@ class AuthService {
         uid: result.user!.uid,
         email: result.user!.email ?? '',
         role: data['role'] ?? '',
+        name: data['name'],
+        phone: data['phone'],
       );
     } on FirebaseAuthException catch (e) {
       switch (e.code) {
@@ -73,11 +77,18 @@ class AuthService {
         password: password.trim(),
       );
       if (result.user == null) return null;
-      await _users.doc(result.user!.uid).set({'email': email, 'role': role});
+      await _users.doc(result.user!.uid).set({
+        'email': email,
+        'role': role,
+        'name': '',
+        'phone': '',
+      });
       return AppUser(
         uid: result.user!.uid,
         email: result.user!.email ?? '',
         role: role,
+        name: '',
+        phone: '',
       );
     } on FirebaseAuthException catch (e) {
       switch (e.code) {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/ihtiyac.dart';
+import '../models/envanter.dart';
 import '../services/firestore_service.dart';
 
 class IhtiyacBildirimScreen extends StatefulWidget {
@@ -12,16 +13,15 @@ class IhtiyacBildirimScreen extends StatefulWidget {
 class _IhtiyacBildirimScreenState extends State<IhtiyacBildirimScreen>
     with AutomaticKeepAliveClientMixin {
   final _formKey = GlobalKey<FormState>();
-  String _kategori = 'Gıda';
-  String _aciklama = '';
-  bool _isLoading = false;
   final FirestoreService _firestoreService = FirestoreService();
+  Map<String, int> _secilenUrunler = {};
+  bool _isLoading = false;
 
   @override
   bool get wantKeepAlive => true;
 
   Future<void> _submitIhtiyac() async {
-    if (_formKey.currentState!.validate()) {
+    if (_formKey.currentState!.validate() && _secilenUrunler.isNotEmpty) {
       setState(() => _isLoading = true);
       try {
         Position position = await Geolocator.getCurrentPosition(
@@ -30,8 +30,7 @@ class _IhtiyacBildirimScreenState extends State<IhtiyacBildirimScreen>
         Ihtiyac ihtiyac = Ihtiyac(
           id: DateTime.now().millisecondsSinceEpoch.toString(),
           userId: FirebaseAuth.instance.currentUser!.uid,
-          kategori: _kategori,
-          aciklama: _aciklama,
+          urunler: _secilenUrunler,
           latitude: position.latitude,
           longitude: position.longitude,
           timestamp: DateTime.now(),
@@ -40,6 +39,9 @@ class _IhtiyacBildirimScreenState extends State<IhtiyacBildirimScreen>
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('İhtiyaç bildirildi')));
+        setState(() {
+          _secilenUrunler = {};
+        });
         _formKey.currentState!.reset();
       } catch (e) {
         ScaffoldMessenger.of(
@@ -48,6 +50,10 @@ class _IhtiyacBildirimScreenState extends State<IhtiyacBildirimScreen>
       } finally {
         setState(() => _isLoading = false);
       }
+    } else {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Lütfen en az bir ürün seçin')));
     }
   }
 
@@ -64,30 +70,70 @@ class _IhtiyacBildirimScreenState extends State<IhtiyacBildirimScreen>
             key: _formKey,
             child: Column(
               children: [
-                DropdownButtonFormField<String>(
-                  value: _kategori,
-                  items: ['Gıda', 'Su', 'Barınma', 'Sağlık']
-                      .map(
-                        (kategori) => DropdownMenuItem(
-                          value: kategori,
-                          child: Text(kategori),
-                        ),
-                      )
-                      .toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      _kategori = value!;
-                    });
+                StreamBuilder<List<EnvanterItem>>(
+                  stream: _firestoreService.getEnvanter(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(child: CircularProgressIndicator());
+                    }
+                    if (snapshot.hasError) {
+                      return Center(child: Text('Hata: ${snapshot.error}'));
+                    }
+                    if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                      return Center(child: Text('Envanterde ürün bulunamadı'));
+                    }
+
+                    final envanter = snapshot.data!;
+                    return Column(
+                      children: envanter.map((item) {
+                        return ListTile(
+                          title: Text('${item.ad} (Stok: ${item.miktar})'),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: Icon(Icons.remove),
+                                onPressed: () {
+                                  setState(() {
+                                    if (_secilenUrunler.containsKey(item.id)) {
+                                      if (_secilenUrunler[item.id]! > 0) {
+                                        _secilenUrunler[item.id] =
+                                            _secilenUrunler[item.id]! - 1;
+                                        if (_secilenUrunler[item.id] == 0) {
+                                          _secilenUrunler.remove(item.id);
+                                        }
+                                      }
+                                    }
+                                  });
+                                },
+                              ),
+                              Text(_secilenUrunler[item.id]?.toString() ?? '0'),
+                              IconButton(
+                                icon: Icon(Icons.add),
+                                onPressed: () {
+                                  if (item.miktar >
+                                      (_secilenUrunler[item.id] ?? 0)) {
+                                    setState(() {
+                                      _secilenUrunler[item.id] =
+                                          (_secilenUrunler[item.id] ?? 0) + 1;
+                                    });
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          '${item.ad} için yeterli stok yok',
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                },
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    );
                   },
-                  decoration: InputDecoration(labelText: 'Kategori'),
-                ),
-                SizedBox(height: 16),
-                TextFormField(
-                  decoration: InputDecoration(labelText: 'Açıklama'),
-                  maxLines: 3,
-                  onChanged: (value) => _aciklama = value,
-                  validator: (value) =>
-                      value!.isEmpty ? 'Açıklama girin' : null,
                 ),
                 SizedBox(height: 20),
                 ElevatedButton(
