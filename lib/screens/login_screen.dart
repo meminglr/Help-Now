@@ -7,98 +7,130 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final AuthService _authService = AuthService();
   final _formKey = GlobalKey<FormState>();
-  String _email = '';
-  String _password = '';
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final AuthService _authService = AuthService();
   bool _isLoading = false;
-  String? _errorMessage;
+
+  Future<void> _signIn({String? email, String? password}) async {
+    if (email == null && password == null) {
+      // Manual giriş için form doğrulama
+      if (!_formKey.currentState!.validate()) return;
+    }
+    setState(() => _isLoading = true);
+    try {
+      await _authService.signIn(
+        email ?? _emailController.text,
+        password ?? _passwordController.text,
+      );
+      Navigator.pushReplacementNamed(context, '/main');
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Giriş hatası: $e')));
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Giriş Yap')),
-      body: GestureDetector(
-        onTap: () => FocusScope.of(context).unfocus(),
-        child: SingleChildScrollView(
-          padding: EdgeInsets.all(16.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              children: [
-                TextFormField(
-                  decoration: InputDecoration(labelText: 'E-posta'),
-                  keyboardType: TextInputType.emailAddress,
-                  onChanged: (value) => _email = value,
-                  validator: (value) => value!.isEmpty ? 'E-posta girin' : null,
-                ),
-                SizedBox(height: 16),
-                TextFormField(
-                  decoration: InputDecoration(labelText: 'Şifre'),
-                  obscureText: true,
-                  onChanged: (value) => _password = value,
-                  validator: (value) => value!.isEmpty ? 'Şifre girin' : null,
-                ),
-                SizedBox(height: 20),
-                if (_errorMessage != null)
-                  Padding(
-                    padding: EdgeInsets.only(bottom: 16.0),
-                    child: Text(
-                      _errorMessage!,
-                      style: TextStyle(color: Colors.red),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  TextFormField(
+                    controller: _emailController,
+                    decoration: InputDecoration(
+                      labelText: 'E-posta',
+                      border: OutlineInputBorder(),
                     ),
+                    keyboardType: TextInputType.emailAddress,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'E-posta gerekli';
+                      }
+                      if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                        return 'Geçerli bir e-posta girin';
+                      }
+                      return null;
+                    },
                   ),
+                  SizedBox(height: 16),
+                  TextFormField(
+                    controller: _passwordController,
+                    decoration: InputDecoration(
+                      labelText: 'Şifre',
+                      border: OutlineInputBorder(),
+                    ),
+                    obscureText: true,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Şifre gerekli';
+                      }
+                      if (value.length < 6) {
+                        return 'Şifre en az 6 karakter olmalı';
+                      }
+                      return null;
+                    },
+                  ),
+                  SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: _isLoading ? null : () => _signIn(),
+                    child: _isLoading
+                        ? CircularProgressIndicator(color: Colors.white)
+                        : Text('Giriş Yap'),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pushNamed(context, '/register'),
+                    child: Text('Hesabınız yok mu? Kayıt ol'),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 20),
+            Text('Test Girişi', style: Theme.of(context).textTheme.titleLarge),
+            SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
                 ElevatedButton(
                   onPressed: _isLoading
                       ? null
-                      : () async {
-                          if (_formKey.currentState!.validate()) {
-                            setState(() {
-                              _isLoading = true;
-                              _errorMessage = null;
-                            });
-                            try {
-                              final user = await _authService.signIn(
-                                _email,
-                                _password,
-                              );
-                              if (user != null) {
-                                Navigator.pushReplacementNamed(
-                                  context,
-                                  '/main',
-                                );
-                              } else {
-                                setState(() {
-                                  _errorMessage = 'Kullanıcı bulunamadı';
-                                });
-                              }
-                            } catch (e) {
-                              setState(() {
-                                _errorMessage = e.toString().replaceFirst(
-                                  'Exception: ',
-                                  '',
-                                );
-                              });
-                            } finally {
-                              setState(() => _isLoading = false);
-                            }
-                          }
-                        },
-                  child: _isLoading
-                      ? CircularProgressIndicator(color: Colors.white)
-                      : Text('Giriş Yap'),
+                      : () => _signIn(email: 'd@d.com', password: '123456'),
+                  child: Text('Depremzede'),
                 ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/register');
-                  },
-                  child: Text('Hesabınız yok mu? Kayıt olun'),
+                ElevatedButton(
+                  onPressed: _isLoading
+                      ? null
+                      : () => _signIn(email: 'g@g.com', password: '123456'),
+                  child: Text('Gönüllü'),
+                ),
+                ElevatedButton(
+                  onPressed: _isLoading
+                      ? null
+                      : () => _signIn(email: 'k@k.com', password: '123456'),
+                  child: Text('Kurum'),
                 ),
               ],
             ),
-          ),
+          ],
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 }

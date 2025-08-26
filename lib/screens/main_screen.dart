@@ -8,6 +8,7 @@ import 'harita_screen.dart';
 import 'kurum_yonetim_screen.dart';
 import 'profile_screen.dart';
 import 'gonullu_onay_screen.dart';
+import 'envanter_yonetim_screen.dart';
 
 class MainScreen extends StatefulWidget {
   @override
@@ -42,6 +43,7 @@ class _MainScreenState extends State<MainScreen> {
           if (user.role == 'depremzede') IhtiyacBildirimScreen(),
           if (user.role != 'depremzede') HaritaScreen(),
           if (user.role == 'gonullu') GonulluOnayScreen(),
+          if (user.role == 'gonullu') EnvanterYonetimScreen(),
           if (user.role == 'kurum') KurumYonetimScreen(),
           ProfileScreen(),
         ];
@@ -58,6 +60,11 @@ class _MainScreenState extends State<MainScreen> {
             BottomNavigationBarItem(
               icon: Icon(Icons.check_circle),
               label: 'Onaylama',
+            ),
+          if (user.role == 'gonullu')
+            BottomNavigationBarItem(
+              icon: Icon(Icons.inventory),
+              label: 'Envanter',
             ),
           if (user.role == 'kurum')
             BottomNavigationBarItem(

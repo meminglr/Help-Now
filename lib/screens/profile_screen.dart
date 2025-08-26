@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../services/auth_service.dart';
 import '../models/user.dart';
-import '../services/firestore_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   @override
@@ -12,102 +11,136 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen>
     with AutomaticKeepAliveClientMixin {
   final AuthService _authService = AuthService();
-  final FirestoreService _firestoreService = FirestoreService();
+  final TextEditingController _isimController = TextEditingController();
+  final TextEditingController _soyisimController = TextEditingController();
+  final TextEditingController _adresController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  String _name = '';
-  String _phone = '';
   bool _isLoading = false;
+  AppUser? _user;
 
   @override
   bool get wantKeepAlive => true;
 
   @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    final user = await _authService.user.first;
+    if (user != null) {
+      setState(() {
+        _user = user;
+        _isimController.text = user.isim;
+        _soyisimController.text = user.soyisim;
+        _adresController.text = user.adres ?? '';
+      });
+    }
+  }
+
+  Future<void> _updateProfile() async {
+    if (_formKey.currentState!.validate()) {
+      setState(() => _isLoading = true);
+      try {
+        await _authService.updateUserProfile(_user!.uid, {
+          'isim': _isimController.text,
+          'soyisim': _soyisimController.text,
+          'adres': _adresController.text.isEmpty ? null : _adresController.text,
+        });
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Profil güncellendi')));
+      } catch (e) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Hata: $e')));
+      } finally {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     super.build(context);
-    return StreamBuilder<AppUser?>(
-      stream: _authService.user,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
-        }
-        if (!snapshot.hasData) {
-          return Center(child: Text('Kullanıcı bulunamadı'));
-        }
-        final user = snapshot.data!;
-        _name = user.name ?? '';
-        _phone = user.phone ?? '';
-
-        return Scaffold(
-          appBar: AppBar(title: Text('Profil')),
-          body: GestureDetector(
-            onTap: () => FocusScope.of(context).unfocus(),
-            child: SingleChildScrollView(
-              padding: EdgeInsets.all(16.0),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    TextFormField(
-                      initialValue: user.email,
-                      decoration: InputDecoration(
-                        labelText: 'E-posta (Değiştirilemez)',
-                      ),
-                      enabled: false,
-                    ),
-                    SizedBox(height: 16),
-                    TextFormField(
-                      initialValue: _name,
-                      decoration: InputDecoration(labelText: 'İsim'),
-                      onChanged: (value) => _name = value,
-                      validator: (value) =>
-                          value!.isEmpty ? 'İsim girin' : null,
-                    ),
-                    SizedBox(height: 16),
-                    TextFormField(
-                      initialValue: _phone,
-                      decoration: InputDecoration(labelText: 'Telefon'),
-                      keyboardType: TextInputType.phone,
-                      onChanged: (value) => _phone = value,
-                      validator: (value) =>
-                          value!.isEmpty ? 'Telefon girin' : null,
-                    ),
-                    SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: _isLoading
-                          ? null
-                          : () async {
-                              if (_formKey.currentState!.validate()) {
-                                setState(() => _isLoading = true);
-                                try {
-                                  await _firestoreService.updateUserProfile(
-                                    FirebaseAuth.instance.currentUser!.uid,
-                                    {'name': _name, 'phone': _phone},
-                                  );
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text('Profil güncellendi'),
-                                    ),
-                                  );
-                                } catch (e) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Hata: $e')),
-                                  );
-                                } finally {
-                                  setState(() => _isLoading = false);
-                                }
-                              }
-                            },
-                      child: _isLoading
-                          ? CircularProgressIndicator(color: Colors.white)
-                          : Text('Profili Güncelle'),
-                    ),
-                  ],
+    if (_user == null) {
+      return Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    return Scaffold(
+      appBar: AppBar(title: Text('Profil')),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              TextFormField(
+                controller: _isimController,
+                decoration: InputDecoration(
+                  labelText: 'İsim',
+                  border: OutlineInputBorder(),
                 ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'İsim gerekli';
+                  }
+                  return null;
+                },
               ),
-            ),
+              SizedBox(height: 16),
+              TextFormField(
+                controller: _soyisimController,
+                decoration: InputDecoration(
+                  labelText: 'Soyisim',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Soyisim gerekli';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 16),
+              TextFormField(
+                controller: _adresController,
+                decoration: InputDecoration(
+                  labelText: 'Adres (İsteğe bağlı)',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 3,
+              ),
+              SizedBox(height: 16),
+              Text('E-posta: ${_user!.email}'),
+              SizedBox(height: 8),
+              Text('Rol: ${_user!.role}'),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _isLoading ? null : _updateProfile,
+                child: _isLoading
+                    ? CircularProgressIndicator(color: Colors.white)
+                    : Text('Profili Güncelle'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  await FirebaseAuth.instance.signOut();
+                  Navigator.pushReplacementNamed(context, '/login');
+                },
+                child: Text('Çıkış Yap'),
+              ),
+            ],
           ),
-        );
-      },
+        ),
+      ),
     );
+  }
+
+  @override
+  void dispose() {
+    _isimController.dispose();
+    _soyisimController.dispose();
+    _adresController.dispose();
+    super.dispose();
   }
 }

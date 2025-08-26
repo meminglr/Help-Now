@@ -3,8 +3,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class Ihtiyac {
   final String id;
   final String userId;
-  final Map<String, int> urunler; // Ürün ID’si ve miktarı
-  final String durum; // beklemede, onaylandı, reddedildi, yetersiz
+  final Map<String, int> urunler;
+  final String isim;
+  final String soyisim;
+  final String adresTarifi;
+  final String not;
+  final String durum;
   final double latitude;
   final double longitude;
   final DateTime timestamp;
@@ -13,6 +17,10 @@ class Ihtiyac {
     required this.id,
     required this.userId,
     required this.urunler,
+    required this.isim,
+    required this.soyisim,
+    required this.adresTarifi,
+    required this.not,
     this.durum = 'beklemede',
     required this.latitude,
     required this.longitude,
@@ -24,6 +32,10 @@ class Ihtiyac {
       'id': id,
       'userId': userId,
       'urunler': urunler,
+      'isim': isim,
+      'soyisim': soyisim,
+      'adresTarifi': adresTarifi,
+      'not': not,
       'durum': durum,
       'latitude': latitude,
       'longitude': longitude,
@@ -36,6 +48,10 @@ class Ihtiyac {
       id: id,
       userId: map['userId'] ?? '',
       urunler: Map<String, int>.from(map['urunler'] ?? {}),
+      isim: map['isim'] ?? '',
+      soyisim: map['soyisim'] ?? '',
+      adresTarifi: map['adresTarifi'] ?? '',
+      not: map['not'] ?? '',
       durum: map['durum'] ?? 'beklemede',
       latitude: map['latitude']?.toDouble() ?? 0.0,
       longitude: map['longitude']?.toDouble() ?? 0.0,

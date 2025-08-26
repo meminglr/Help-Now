@@ -3,6 +3,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:intl/intl.dart';
 import '../models/ihtiyac.dart';
 import '../services/firestore_service.dart';
 import '../services/auth_service.dart';
@@ -185,7 +186,7 @@ class _HaritaScreenState extends State<HaritaScreen>
                           padding: EdgeInsets.all(8.0),
                           child: TextField(
                             decoration: InputDecoration(
-                              labelText: 'İhtiyaç Ara (Ürün ID)',
+                              labelText: 'İhtiyaç Ara (Ürün ID veya İsim)',
                               border: OutlineInputBorder(),
                               prefixIcon: Icon(Icons.search),
                             ),
@@ -239,6 +240,12 @@ class _HaritaScreenState extends State<HaritaScreen>
                                       (key) => key.toLowerCase().contains(
                                         _searchQuery,
                                       ),
+                                    ) ||
+                                    ihtiyac.isim.toLowerCase().contains(
+                                      _searchQuery,
+                                    ) ||
+                                    ihtiyac.soyisim.toLowerCase().contains(
+                                      _searchQuery,
                                     );
                                 return matchesDurum && matchesSearch;
                               }).toList();
@@ -253,12 +260,19 @@ class _HaritaScreenState extends State<HaritaScreen>
                                       ihtiyac.longitude,
                                     ),
                                     infoWindow: InfoWindow(
-                                      title: 'İhtiyaç #${ihtiyac.id}',
-                                      snippet: ihtiyac.urunler.entries
-                                          .map(
-                                            (e) => '${e.key}: ${e.value} adet',
-                                          )
-                                          .join('\n'),
+                                      title:
+                                          'İhtiyaç #${ihtiyac.id} (${ihtiyac.isim} ${ihtiyac.soyisim})',
+                                      snippet: [
+                                        ...ihtiyac.urunler.entries.map(
+                                          (e) => '${e.key}: ${e.value} adet',
+                                        ),
+                                        'Adres: ${ihtiyac.adresTarifi}',
+                                        if (ihtiyac.not.isNotEmpty)
+                                          'Not: ${ihtiyac.not}',
+                                        'Durum: ${ihtiyac.durum}',
+                                        'Tarih: ${DateFormat('dd/MM/yyyy').format(ihtiyac.timestamp)}',
+                                        'Saat: ${DateFormat('HH:mm').format(ihtiyac.timestamp)}',
+                                      ].join('\n'),
                                       onTap: () {
                                         if (user.role == 'gonullu') {
                                           Navigator.push(
@@ -287,17 +301,27 @@ class _HaritaScreenState extends State<HaritaScreen>
                                 itemBuilder: (context, index) {
                                   final ihtiyac = ihtiyaclar[index];
                                   return ListTile(
-                                    title: Text('İhtiyaç #${ihtiyac.id}'),
+                                    title: Text(
+                                      'İhtiyaç #${ihtiyac.id} (${ihtiyac.isim} ${ihtiyac.soyisim})',
+                                    ),
                                     subtitle: Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
-                                      children: ihtiyac.urunler.entries
-                                          .map<Widget>(
-                                            (e) => Text(
-                                              '${e.key}: ${e.value} adet',
-                                            ),
-                                          )
-                                          .toList(),
+                                      children: [
+                                        ...ihtiyac.urunler.entries.map(
+                                          (e) =>
+                                              Text('${e.key}: ${e.value} adet'),
+                                        ),
+                                        Text('Adres: ${ihtiyac.adresTarifi}'),
+                                        if (ihtiyac.not.isNotEmpty)
+                                          Text('Not: ${ihtiyac.not}'),
+                                        Text(
+                                          'Tarih: ${DateFormat('dd/MM/yyyy').format(ihtiyac.timestamp)}',
+                                        ),
+                                        Text(
+                                          'Saat: ${DateFormat('HH:mm').format(ihtiyac.timestamp)}',
+                                        ),
+                                      ],
                                     ),
                                     trailing: IconButton(
                                       icon: Icon(Icons.directions),
