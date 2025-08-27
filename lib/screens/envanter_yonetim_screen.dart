@@ -31,16 +31,40 @@ class _EnvanterYonetimScreenState extends State<EnvanterYonetimScreen>
     });
   }
 
-  Future<void> _addOrUpdateUrun() async {
+  // kaldırıldı: _addOrUpdateUrun (artık ayrı ekle/güncelle butonları var)
+
+  Future<void> _ekleUrun() async {
     if (_urunAdiController.text.isEmpty || _urunMiktarController.text.isEmpty) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Ürün adı ve miktar girin')));
       return;
     }
-
     try {
-      final urunId = _urunAdiController.text.toLowerCase().replaceAll(' ', '_');
+      final miktar = int.parse(_urunMiktarController.text);
+      await _firestoreService.donateEnvanter(_urunAdiController.text, miktar);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Ürün miktarı artırıldı')));
+      _calculateTotalStok();
+      _urunAdiController.clear();
+      _urunMiktarController.clear();
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Hata: $e')));
+    }
+  }
+
+  Future<void> _guncelleUrun() async {
+    if (_urunAdiController.text.isEmpty || _urunMiktarController.text.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Ürün adı ve miktar girin')));
+      return;
+    }
+    try {
+      final urunId = _normalizeProductId(_urunAdiController.text);
       final miktar = int.parse(_urunMiktarController.text);
       final mevcutUrun = await _firestoreService.getEnvanter().first.then(
         (list) => list.firstWhere(
@@ -70,6 +94,27 @@ class _EnvanterYonetimScreenState extends State<EnvanterYonetimScreen>
         context,
       ).showSnackBar(SnackBar(content: Text('Hata: $e')));
     }
+  }
+
+  String _normalizeProductId(String name) {
+    String s = name.trim().toLowerCase();
+    const Map<String, String> trMap = {
+      'ç': 'c',
+      'ğ': 'g',
+      'ı': 'i',
+      'ö': 'o',
+      'ş': 's',
+      'ü': 'u',
+      'â': 'a',
+      'î': 'i',
+      'û': 'u',
+    };
+    trMap.forEach((k, v) => s = s.replaceAll(k, v));
+    s = s
+        .replaceAll(RegExp(r'[^a-z0-9]+'), '_')
+        .replaceAll(RegExp(r'_+'), '_')
+        .replaceAll(RegExp(r'^_|_$'), '');
+    return s;
   }
 
   @override
@@ -153,9 +198,50 @@ class _EnvanterYonetimScreenState extends State<EnvanterYonetimScreen>
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   SizedBox(height: 8),
-                  TextField(
-                    controller: _urunAdiController,
-                    decoration: InputDecoration(labelText: 'Ürün Adı'),
+                  StreamBuilder<List<String>>(
+                    stream: _firestoreService.getEnvanterAdlari(),
+                    builder: (context, snapshot) {
+                      final suggestions = snapshot.data ?? const <String>[];
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Ürün Adı'),
+                          const SizedBox(height: 8),
+                          Autocomplete<String>(
+                            optionsBuilder: (TextEditingValue value) {
+                              if (value.text.trim().isEmpty) {
+                                return const Iterable<String>.empty();
+                              }
+                              final lower = value.text.toLowerCase();
+                              return suggestions.where(
+                                (s) => s.toLowerCase().contains(lower),
+                              );
+                            },
+                            fieldViewBuilder:
+                                (
+                                  context,
+                                  textController,
+                                  focusNode,
+                                  onFieldSubmitted,
+                                ) {
+                                  return TextField(
+                                    controller: textController,
+                                    focusNode: focusNode,
+                                    decoration: InputDecoration(
+                                      hintText: 'Ürün adı yazın veya seçin',
+                                    ),
+                                    onChanged: (v) {
+                                      _urunAdiController.text = v;
+                                    },
+                                  );
+                                },
+                            onSelected: (String selection) {
+                              _urunAdiController.text = selection;
+                            },
+                          ),
+                        ],
+                      );
+                    },
                   ),
                   TextField(
                     controller: _urunMiktarController,
@@ -163,9 +249,22 @@ class _EnvanterYonetimScreenState extends State<EnvanterYonetimScreen>
                     keyboardType: TextInputType.number,
                   ),
                   SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: _addOrUpdateUrun,
-                    child: Text('Ekle/Güncelle'),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: _ekleUrun,
+                          child: Text('Ekle (Arttır)'),
+                        ),
+                      ),
+                      SizedBox(width: 12),
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: _guncelleUrun,
+                          child: Text('Güncelle (Set Et)'),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
