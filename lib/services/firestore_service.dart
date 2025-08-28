@@ -195,4 +195,21 @@ class FirestoreService {
   Future<void> updateUserProfile(String uid, Map<String, dynamic> data) async {
     await _users.doc(uid).update(data);
   }
+
+  // Kullanıcı rolleri sayımları: depremzede, gonullu, kurum
+  Stream<Map<String, int>> getUserRoleCounts() {
+    return _users.snapshots().map((snapshot) {
+      int depremzede = 0;
+      int gonullu = 0;
+      int kurum = 0;
+      for (final doc in snapshot.docs) {
+        final data = doc.data() as Map<String, dynamic>;
+        final String role = (data['role'] as String?)?.toLowerCase() ?? '';
+        if (role == 'depremzede') depremzede++;
+        if (role == 'gonullu') gonullu++;
+        if (role == 'kurum') kurum++;
+      }
+      return {'depremzede': depremzede, 'gonullu': gonullu, 'kurum': kurum};
+    });
+  }
 }

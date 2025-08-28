@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import '../services/auth_service.dart';
 import '../models/user.dart';
 import 'home_screen.dart';
@@ -39,7 +38,14 @@ class _MainScreenState extends State<MainScreen> {
       setState(() {
         _user = user;
         _screens = [
-          HomeScreen(),
+          // HomeScreen'e bottom tab geçiş callback ve hedef indeksler geçilir
+          HomeScreen(
+            onNavigateToTab: (int index) {
+              setState(() {
+                _selectedIndex = index;
+              });
+            },
+          ),
           if (user.role == 'depremzede') IhtiyacBildirimScreen(),
           if (user.role != 'depremzede') HaritaScreen(),
           if (user.role == 'gonullu') GonulluOnayScreen(),
@@ -73,6 +79,38 @@ class _MainScreenState extends State<MainScreen> {
             ),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
         ];
+        // Gonullu sekme indekslerini hesapla ve HomeScreen'e yeniden kurulumla ilet
+        if (user.role == 'gonullu') {
+          final onayIndex = _screens!.indexWhere(
+            (w) => w.runtimeType.toString() == 'GonulluOnayScreen',
+          );
+          final envanterIndex = _screens!.indexWhere(
+            (w) => w.runtimeType.toString() == 'EnvanterYonetimScreen',
+          );
+          _screens![0] = HomeScreen(
+            onNavigateToTab: (int index) {
+              setState(() {
+                _selectedIndex = index;
+              });
+            },
+            gonulluOnayTabIndex: onayIndex >= 0 ? onayIndex : null,
+            envanterTabIndex: envanterIndex >= 0 ? envanterIndex : null,
+          );
+        }
+        // Kurum sekme indeksini hesapla ve HomeScreen'e ilet
+        if (user.role == 'kurum') {
+          final kurumIndex = _screens!.indexWhere(
+            (w) => w.runtimeType.toString() == 'KurumYonetimScreen',
+          );
+          _screens![0] = HomeScreen(
+            onNavigateToTab: (int index) {
+              setState(() {
+                _selectedIndex = index;
+              });
+            },
+            kurumYonetimTabIndex: kurumIndex >= 0 ? kurumIndex : null,
+          );
+        }
         _isLoading = false;
       });
     } catch (e) {
