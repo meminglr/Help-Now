@@ -177,14 +177,14 @@ class _IhtiyacBildirimScreenState extends State<IhtiyacBildirimScreen>
                       return Center(child: Text('Hata: ${snapshot.error}'));
                     }
                     if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return Center(child: Text('Envanterde ürün bulunamadı'));
+                      return Center(child: Text('Depoda ürün bulunamadı'));
                     }
 
                     final envanter = snapshot.data!;
                     return Column(
                       children: envanter.map((item) {
                         return ListTile(
-                          title: Text('${item.ad} (Stok: ${item.miktar})'),
+                          title: Text(item.ad),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [

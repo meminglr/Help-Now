@@ -121,18 +121,18 @@ class _EnvanterYonetimScreenState extends State<EnvanterYonetimScreen>
   Widget build(BuildContext context) {
     super.build(context);
     return Scaffold(
-      appBar: AppBar(title: Text('Envanter Yönetimi')),
+      appBar: AppBar(title: Text('Depo Yönetimi')),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Envanter Doluluk Durumu
+            // Depo Doluluk Durumu
             Padding(
               padding: EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Envanter Doluluk Durumu',
+                    'Depo Doluluk Durumu',
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   SizedBox(height: 8),
@@ -148,9 +148,7 @@ class _EnvanterYonetimScreenState extends State<EnvanterYonetimScreen>
                         return Center(child: Text('Hata: ${snapshot.error}'));
                       }
                       if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                        return Center(
-                          child: Text('Envanterde ürün bulunamadı'),
-                        );
+                        return Center(child: Text('Depoda ürün bulunamadı'));
                       }
 
                       final envanter = snapshot.data!;
@@ -259,7 +257,7 @@ class _EnvanterYonetimScreenState extends State<EnvanterYonetimScreen>
                       ),
                       SizedBox(width: 12),
                       Expanded(
-                        child: OutlinedButton(
+                        child: ElevatedButton(
                           onPressed: _guncelleUrun,
                           child: Text('Güncelle (Set Et)'),
                         ),

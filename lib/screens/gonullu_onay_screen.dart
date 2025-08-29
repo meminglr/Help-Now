@@ -50,7 +50,7 @@ class _GonulluOnayScreenState extends State<GonulluOnayScreen>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Envanter yetersiz: ${eksikUrunler.entries.map((e) => "${e.key}: ${e.value} adet").join(", ")}',
+              'Depo yetersiz: ${eksikUrunler.entries.map((e) => "${e.key}: ${e.value} adet").join(", ")}',
             ),
           ),
         );

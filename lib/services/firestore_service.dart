@@ -12,6 +12,9 @@ class FirestoreService {
   final CollectionReference _envanter = FirebaseFirestore.instance.collection(
     'envanter',
   );
+  final CollectionReference _hareketler = FirebaseFirestore.instance.collection(
+    'envanter_hareketleri',
+  );
   final CollectionReference _eksikIstekler = FirebaseFirestore.instance
       .collection('eksik_istekler');
 
@@ -53,7 +56,33 @@ class FirestoreService {
   }
 
   Future<void> updateEnvanterMiktar(String itemId, int yeniMiktar) async {
-    await _envanter.doc(itemId).update({'miktar': yeniMiktar});
+    final DocumentReference docRef = _envanter.doc(itemId);
+    // Mevcut miktarı oku, sonra güncelle ve hareket kaydı oluştur
+    await FirebaseFirestore.instance.runTransaction((transaction) async {
+      final snapshot = await transaction.get(docRef);
+      int eskiMiktar = 0;
+      String ad = itemId;
+      if (snapshot.exists) {
+        final data = snapshot.data() as Map<String, dynamic>;
+        eskiMiktar = (data['miktar'] as int?) ?? 0;
+        ad = (data['ad'] as String?) ?? itemId;
+      }
+      transaction.update(docRef, {'miktar': yeniMiktar});
+
+      final int degisim = yeniMiktar - eskiMiktar;
+      if (degisim != 0) {
+        // Transaction dışında yazmak yerine, aynı transaction içinde ayrı bir koleksiyona yaz
+        final hareketRef = _hareketler.doc();
+        transaction.set(hareketRef, {
+          'itemId': itemId,
+          'ad': ad,
+          'degisim': degisim,
+          'tur': degisim > 0 ? 'giris' : 'cikis',
+          'kaynak': 'manuel_guncelleme',
+          'timestamp': FieldValue.serverTimestamp(),
+        });
+      }
+    });
   }
 
   // Kurumlardan gelen bağış ile envanter artırma/oluşturma
@@ -79,6 +108,16 @@ class FirestoreService {
           'miktar': miktar,
         });
       }
+      // Hareket kaydı
+      final hareketRef = _hareketler.doc();
+      transaction.set(hareketRef, {
+        'itemId': normalizedId,
+        'ad': ad,
+        'degisim': miktar,
+        'tur': 'giris',
+        'kaynak': 'bagis',
+        'timestamp': FieldValue.serverTimestamp(),
+      });
     });
   }
 
@@ -101,6 +140,80 @@ class FirestoreService {
         .replaceAll(RegExp(r'_+'), '_')
         .replaceAll(RegExp(r'^_|_$'), '');
     return s;
+  }
+
+  // Envanter hareketleri sorguları
+  Stream<Map<String, int>> getGunlukGirisCikis() {
+    final DateTime now = DateTime.now();
+    final DateTime startOfDay = DateTime(now.year, now.month, now.day);
+    return _hareketler
+        .where(
+          'timestamp',
+          isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay),
+        )
+        .snapshots()
+        .map((snapshot) {
+          int giris = 0;
+          int cikis = 0;
+          for (final doc in snapshot.docs) {
+            final data = doc.data() as Map<String, dynamic>;
+            final int degisim = (data['degisim'] as int?) ?? 0;
+            if (degisim > 0) {
+              giris += degisim;
+            } else {
+              cikis += -degisim;
+            }
+          }
+          return {'giris': giris, 'cikis': cikis};
+        });
+  }
+
+  Stream<Map<String, int>> getAylikGirisCikis() {
+    final DateTime now = DateTime.now();
+    final DateTime startOfMonth = DateTime(now.year, now.month, 1);
+    return _hareketler
+        .where(
+          'timestamp',
+          isGreaterThanOrEqualTo: Timestamp.fromDate(startOfMonth),
+        )
+        .snapshots()
+        .map((snapshot) {
+          int giris = 0;
+          int cikis = 0;
+          for (final doc in snapshot.docs) {
+            final data = doc.data() as Map<String, dynamic>;
+            final int degisim = (data['degisim'] as int?) ?? 0;
+            if (degisim > 0) {
+              giris += degisim;
+            } else {
+              cikis += -degisim;
+            }
+          }
+          return {'giris': giris, 'cikis': cikis};
+        });
+  }
+
+  Stream<List<Map<String, dynamic>>> getSonHareketler({int limit = 50}) {
+    return _hareketler
+        .orderBy('timestamp', descending: true)
+        .limit(limit)
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs.map((doc) {
+            final data = doc.data() as Map<String, dynamic>;
+            return {
+              'id': doc.id,
+              'itemId': data['itemId'] ?? '',
+              'ad': data['ad'] ?? '',
+              'degisim': (data['degisim'] as int?) ?? 0,
+              'tur': data['tur'] ?? (data['degisim'] >= 0 ? 'giris' : 'cikis'),
+              'kaynak': data['kaynak'] ?? '',
+              'timestamp': (data['timestamp'] is Timestamp)
+                  ? (data['timestamp'] as Timestamp).toDate()
+                  : DateTime.now(),
+            };
+          }).toList(),
+        );
   }
 
   // İhtiyaç ekleme

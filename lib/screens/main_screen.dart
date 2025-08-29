@@ -8,6 +8,7 @@ import 'kurum_yonetim_screen.dart';
 import 'profile_screen.dart';
 import 'gonullu_onay_screen.dart';
 import 'envanter_yonetim_screen.dart';
+import 'envanter_rapor_screen.dart';
 
 class MainScreen extends StatefulWidget {
   @override
@@ -50,6 +51,7 @@ class _MainScreenState extends State<MainScreen> {
           if (user.role != 'depremzede') HaritaScreen(),
           if (user.role == 'gonullu') GonulluOnayScreen(),
           if (user.role == 'gonullu') EnvanterYonetimScreen(),
+          if (user.role == 'gonullu') EnvanterRaporScreen(),
           if (user.role == 'kurum') KurumYonetimScreen(),
           ProfileScreen(),
         ];
@@ -68,9 +70,11 @@ class _MainScreenState extends State<MainScreen> {
               label: 'Onaylama',
             ),
           if (user.role == 'gonullu')
+            BottomNavigationBarItem(icon: Icon(Icons.inventory), label: 'Depo'),
+          if (user.role == 'gonullu')
             BottomNavigationBarItem(
-              icon: Icon(Icons.inventory),
-              label: 'Envanter',
+              icon: Icon(Icons.analytics),
+              label: 'Rapor',
             ),
           if (user.role == 'kurum')
             BottomNavigationBarItem(
@@ -79,13 +83,18 @@ class _MainScreenState extends State<MainScreen> {
             ),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
         ];
-        // Gonullu sekme indekslerini hesapla ve HomeScreen'e yeniden kurulumla ilet
+        // Gonullu sekme in
+        //
+        //dekslerini hesapla ve HomeScreen'e yeniden kurulumla ilet
         if (user.role == 'gonullu') {
           final onayIndex = _screens!.indexWhere(
             (w) => w.runtimeType.toString() == 'GonulluOnayScreen',
           );
           final envanterIndex = _screens!.indexWhere(
             (w) => w.runtimeType.toString() == 'EnvanterYonetimScreen',
+          );
+          final raporIndex = _screens!.indexWhere(
+            (w) => w.runtimeType.toString() == 'EnvanterRaporScreen',
           );
           _screens![0] = HomeScreen(
             onNavigateToTab: (int index) {
@@ -95,6 +104,7 @@ class _MainScreenState extends State<MainScreen> {
             },
             gonulluOnayTabIndex: onayIndex >= 0 ? onayIndex : null,
             envanterTabIndex: envanterIndex >= 0 ? envanterIndex : null,
+            raporTabIndex: raporIndex >= 0 ? raporIndex : null,
           );
         }
         // Kurum sekme indeksini hesapla ve HomeScreen'e ilet

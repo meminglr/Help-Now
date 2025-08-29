@@ -8,12 +8,14 @@ class HomeScreen extends StatefulWidget {
   final int? gonulluOnayTabIndex;
   final int? envanterTabIndex;
   final int? kurumYonetimTabIndex;
+  final int? raporTabIndex;
 
   HomeScreen({
     this.onNavigateToTab,
     this.gonulluOnayTabIndex,
     this.envanterTabIndex,
     this.kurumYonetimTabIndex,
+    this.raporTabIndex,
   });
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -64,7 +66,7 @@ class _HomeScreenState extends State<HomeScreen>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Hoş Geldiniz, ${user.email}!'),
+                        Text('Hoş Geldiniz, ${user.isim}!'),
                         Text('Rolünüz: ${user.role}'),
                       ],
                     ),
@@ -196,7 +198,7 @@ class _HomeScreenState extends State<HomeScreen>
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Envanter Özeti',
+                                    'Depo Özeti',
                                     style: Theme.of(
                                       context,
                                     ).textTheme.titleMedium,
@@ -224,6 +226,44 @@ class _HomeScreenState extends State<HomeScreen>
                                         'Ürün: ${data['urunSayisi']} • Toplam birim: ${data['toplamBirim']}',
                                       );
                                     },
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Icon(Icons.chevron_right),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 12),
+                  InkWell(
+                    onTap: () {
+                      if (widget.onNavigateToTab != null &&
+                          widget.raporTabIndex != null) {
+                        widget.onNavigateToTab!(widget.raporTabIndex!);
+                      }
+                    },
+                    child: Card(
+                      child: Padding(
+                        padding: EdgeInsets.all(16),
+                        child: Row(
+                          children: [
+                            Icon(Icons.assessment, color: Colors.purple),
+                            SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Depo Raporu',
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.titleMedium,
+                                  ),
+                                  SizedBox(height: 6),
+                                  Text(
+                                    'Giriş-çıkış hareketleri, günlük özet ve detaylı raporlar',
                                   ),
                                 ],
                               ),
