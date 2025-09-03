@@ -39,7 +39,6 @@ class _MainScreenState extends State<MainScreen> {
       setState(() {
         _user = user;
         _screens = [
-          // HomeScreen'e bottom tab geçiş callback ve hedef indeksler geçilir
           HomeScreen(
             onNavigateToTab: (int index) {
               setState(() {
@@ -83,9 +82,7 @@ class _MainScreenState extends State<MainScreen> {
             ),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
         ];
-        // Gonullu sekme in
-        //
-        //dekslerini hesapla ve HomeScreen'e yeniden kurulumla ilet
+
         if (user.role == 'gonullu') {
           final onayIndex = _screens!.indexWhere(
             (w) => w.runtimeType.toString() == 'GonulluOnayScreen',
@@ -107,7 +104,6 @@ class _MainScreenState extends State<MainScreen> {
             raporTabIndex: raporIndex >= 0 ? raporIndex : null,
           );
         }
-        // Kurum sekme indeksini hesapla ve HomeScreen'e ilet
         if (user.role == 'kurum') {
           final kurumIndex = _screens!.indexWhere(
             (w) => w.runtimeType.toString() == 'KurumYonetimScreen',
@@ -138,13 +134,22 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     if (_isLoading || _user == null || _screens == null || _items == null) {
       return Scaffold(
+        backgroundColor: Colors.white,
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              CircularProgressIndicator(),
-              SizedBox(height: 16),
-              Text('Yükleniyor...'),
+              const CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Colors.blue,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Yükleniyor...',
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyLarge?.copyWith(color: Colors.black),
+              ),
             ],
           ),
         ),
@@ -152,18 +157,26 @@ class _MainScreenState extends State<MainScreen> {
     }
 
     return Scaffold(
+      backgroundColor: Colors.white,
       body: IndexedStack(index: _selectedIndex, children: _screens!),
-      bottomNavigationBar: BottomNavigationBar(
-        items: _items!,
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.blue,
-        unselectedItemColor: Colors.grey,
-        type: BottomNavigationBarType.fixed,
-        onTap: (index) {
+      bottomNavigationBar: NavigationBar(
+        backgroundColor: Colors.white,
+        selectedIndex: _selectedIndex,
+        onDestinationSelected: (index) {
           setState(() {
             _selectedIndex = index;
           });
         },
+        destinations: _items!
+            .map(
+              (item) => NavigationDestination(
+                icon: item.icon,
+                label: item.label ?? '',
+              ),
+            )
+            .toList(),
+        indicatorColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
       ),
     );
   }

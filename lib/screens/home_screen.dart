@@ -31,7 +31,7 @@ class _HomeScreenState extends State<HomeScreen>
 
   @override
   Widget build(BuildContext context) {
-    super.build(context); // AutomaticKeepAliveClientMixin için gerekli
+    super.build(context);
     return StreamBuilder<AppUser?>(
       stream: _authService.user,
       builder: (context, snapshot) {
@@ -43,18 +43,7 @@ class _HomeScreenState extends State<HomeScreen>
         }
         final user = snapshot.data!;
         return Scaffold(
-          appBar: AppBar(
-            title: Text('Deprem Yardım Uygulaması'),
-            actions: [
-              IconButton(
-                icon: Icon(Icons.logout),
-                onPressed: () async {
-                  await _authService.signOut();
-                  Navigator.pushReplacementNamed(context, '/login');
-                },
-              ),
-            ],
-          ),
+          appBar: AppBar(title: Text('Deprem Yardım Uygulaması')),
           body: Padding(
             padding: EdgeInsets.all(16),
             child: Column(

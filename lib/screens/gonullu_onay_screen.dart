@@ -113,15 +113,32 @@ class _GonulluOnayScreenState extends State<GonulluOnayScreen>
   Widget build(BuildContext context) {
     super.build(context);
     return Scaffold(
-      appBar: AppBar(title: Text('İhtiyaç Onaylama')),
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: const Text('İhtiyaç Onaylama'),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 0,
+      ),
       body: StreamBuilder<List<EnvanterItem>>(
         stream: _firestoreService.getEnvanter(),
         builder: (context, envanterSnap) {
           if (envanterSnap.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Colors.blue,
+              ),
+            );
           }
           if (envanterSnap.hasError) {
-            return Center(child: Text('Hata: ${envanterSnap.error}'));
+            return Center(
+              child: Text(
+                'Hata: ${envanterSnap.error}',
+                style: TextStyle(color: Colors.black54),
+              ),
+            );
           }
           final envanter = envanterSnap.data ?? const <EnvanterItem>[];
 
@@ -129,13 +146,28 @@ class _GonulluOnayScreenState extends State<GonulluOnayScreen>
             stream: _firestoreService.getIhtiyaclar(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(child: CircularProgressIndicator());
+                return const Center(
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.blue,
+                  ),
+                );
               }
               if (snapshot.hasError) {
-                return Center(child: Text('Hata: ${snapshot.error}'));
+                return Center(
+                  child: Text(
+                    'Hata: ${snapshot.error}',
+                    style: TextStyle(color: Colors.black54),
+                  ),
+                );
               }
               if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return Center(child: Text('İhtiyaç bulunamadı'));
+                return const Center(
+                  child: Text(
+                    'İhtiyaç bulunamadı',
+                    style: TextStyle(color: Colors.black54),
+                  ),
+                );
               }
 
               final ihtiyaclar = snapshot.data!
@@ -163,9 +195,17 @@ class _GonulluOnayScreenState extends State<GonulluOnayScreen>
                   }
 
                   return Card(
-                    margin: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    elevation: 0,
+                    color: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                     child: Padding(
-                      padding: EdgeInsets.all(12),
+                      padding: const EdgeInsets.all(20),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -175,27 +215,45 @@ class _GonulluOnayScreenState extends State<GonulluOnayScreen>
                               children: [
                                 Text(
                                   'İhtiyaç #${ihtiyac.id} (${ihtiyac.isim} ${ihtiyac.soyisim})',
-                                  style: Theme.of(
-                                    context,
-                                  ).textTheme.titleMedium,
+                                  style: Theme.of(context).textTheme.titleMedium
+                                      ?.copyWith(fontWeight: FontWeight.bold),
                                 ),
-                                SizedBox(height: 6),
+                                const SizedBox(height: 6),
                                 ...ihtiyac.urunler.entries.map(
-                                  (e) => Text('${e.key}: ${e.value} adet'),
+                                  (e) => Text(
+                                    '${e.key}: ${e.value} adet',
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.bodyMedium,
+                                  ),
                                 ),
-                                SizedBox(height: 6),
-                                Text('Adres: ${ihtiyac.adresTarifi}'),
+                                const SizedBox(height: 6),
+                                Text(
+                                  'Adres: ${ihtiyac.adresTarifi}',
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                ),
                                 if (ihtiyac.not.isNotEmpty)
-                                  Text('Not: ${ihtiyac.not}'),
-                                SizedBox(height: 6),
+                                  Text(
+                                    'Not: ${ihtiyac.not}',
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.bodyMedium,
+                                  ),
+                                const SizedBox(height: 6),
                                 Row(
                                   children: [
                                     Text(
                                       'Tarih: ${DateFormat('dd/MM/yyyy').format(ihtiyac.timestamp)}',
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.bodySmall,
                                     ),
-                                    SizedBox(width: 12),
+                                    const SizedBox(width: 12),
                                     Text(
                                       'Saat: ${DateFormat('HH:mm').format(ihtiyac.timestamp)}',
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.bodySmall,
                                     ),
                                   ],
                                 ),
@@ -203,87 +261,60 @@ class _GonulluOnayScreenState extends State<GonulluOnayScreen>
                             ),
                           ),
                           ConstrainedBox(
-                            constraints: BoxConstraints(maxWidth: 160),
+                            constraints: const BoxConstraints(maxWidth: 160),
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
-                                TextButton.icon(
-                                  style: TextButton.styleFrom(
-                                    padding: EdgeInsets.symmetric(
+                                FilledButton.icon(
+                                  style: FilledButton.styleFrom(
+                                    backgroundColor: Colors.green,
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(
                                       horizontal: 8,
                                     ),
-                                    minimumSize: Size(0, 32),
-                                    tapTargetSize:
-                                        MaterialTapTargetSize.shrinkWrap,
-                                    visualDensity: VisualDensity(
-                                      horizontal: -4,
-                                      vertical: -4,
-                                    ),
+                                    minimumSize: const Size(0, 40),
                                   ),
-                                  icon: Icon(
-                                    Icons.check,
-                                    color: Colors.green,
-                                    size: 18,
-                                  ),
-                                  label: Text(
-                                    'Onayla',
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
+                                  icon: const Icon(Icons.check, size: 18),
+                                  label: const Text('Onayla'),
                                   onPressed: () => _onayIhtiyac(ihtiyac),
                                 ),
-                                SizedBox(height: 4),
-                                TextButton.icon(
-                                  style: TextButton.styleFrom(
-                                    padding: EdgeInsets.symmetric(
+                                const SizedBox(height: 8),
+                                FilledButton.icon(
+                                  style: FilledButton.styleFrom(
+                                    backgroundColor: Colors.red,
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(
                                       horizontal: 8,
                                     ),
-                                    minimumSize: Size(0, 32),
-                                    tapTargetSize:
-                                        MaterialTapTargetSize.shrinkWrap,
-                                    visualDensity: VisualDensity(
-                                      horizontal: -4,
-                                      vertical: -4,
-                                    ),
+                                    minimumSize: const Size(0, 40),
                                   ),
-                                  icon: Icon(
-                                    Icons.close,
-                                    color: Colors.red,
-                                    size: 18,
-                                  ),
-                                  label: Text(
-                                    'Reddet',
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
+                                  icon: const Icon(Icons.close, size: 18),
+                                  label: const Text('Reddet'),
                                   onPressed: () => _reddetIhtiyac(ihtiyac),
                                 ),
-                                SizedBox(height: 4),
+                                const SizedBox(height: 8),
                                 if (hasMissing)
-                                  TextButton.icon(
-                                    style: TextButton.styleFrom(
-                                      padding: EdgeInsets.symmetric(
+                                  FilledButton.icon(
+                                    style: FilledButton.styleFrom(
+                                      backgroundColor: Colors.blue,
+                                      foregroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
                                         horizontal: 8,
                                       ),
-                                      minimumSize: Size(0, 32),
-                                      tapTargetSize:
-                                          MaterialTapTargetSize.shrinkWrap,
-                                      visualDensity: VisualDensity(
-                                        horizontal: -4,
-                                        vertical: -4,
-                                      ),
+                                      minimumSize: const Size(0, 40),
                                     ),
-                                    icon: Icon(
-                                      Icons.send,
-                                      color: Colors.blue,
-                                      size: 18,
-                                    ),
-                                    label: Text(
-                                      'Kurumdan iste',
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
+                                    icon: const Icon(Icons.send, size: 18),
+                                    label: const Text('Kurumdan iste'),
                                     onPressed: () => _kurumdanIste(ihtiyac),
                                   ),
                               ],

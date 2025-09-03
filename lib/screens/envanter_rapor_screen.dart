@@ -12,7 +12,6 @@ class _EnvanterRaporScreenState extends State<EnvanterRaporScreen>
   final FirestoreService _firestoreService = FirestoreService();
   int _totalStok = 0;
   int _totalUrunCesidi = 0;
-  List<EnvanterItem> _envanter = [];
   bool _isLoading = true;
 
   @override
@@ -28,7 +27,6 @@ class _EnvanterRaporScreenState extends State<EnvanterRaporScreen>
     try {
       final envanter = await _firestoreService.getEnvanter().first;
       setState(() {
-        _envanter = envanter;
         _totalStok = envanter.fold<int>(0, (sum, item) => sum + item.miktar);
         _totalUrunCesidi = envanter.length;
         _isLoading = false;
@@ -42,8 +40,6 @@ class _EnvanterRaporScreenState extends State<EnvanterRaporScreen>
       );
     }
   }
-
-  // Grafikler kaldırıldı: stok dağılımı ve en yüksek stok grafikleri
 
   @override
   Widget build(BuildContext context) {
@@ -60,6 +56,7 @@ class _EnvanterRaporScreenState extends State<EnvanterRaporScreen>
           : RefreshIndicator(
               onRefresh: _loadEnvanterData,
               child: SingleChildScrollView(
+                physics: BouncingScrollPhysics(),
                 padding: EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -71,8 +68,6 @@ class _EnvanterRaporScreenState extends State<EnvanterRaporScreen>
                     // Günlük/Aylık Hareket Özetleri
                     _buildMovementSummaries(),
                     SizedBox(height: 24),
-
-                    // Grafikler kaldırıldı
 
                     // Son Hareketler
                     _buildRecentMovements(),
@@ -128,7 +123,6 @@ class _EnvanterRaporScreenState extends State<EnvanterRaporScreen>
     Color color,
   ) {
     return Card(
-      elevation: 4,
       child: Padding(
         padding: EdgeInsets.all(16.0),
         child: Column(
@@ -158,7 +152,6 @@ class _EnvanterRaporScreenState extends State<EnvanterRaporScreen>
 
   Widget _buildMovementSummaries() {
     return Card(
-      elevation: 4,
       child: Padding(
         padding: EdgeInsets.all(16.0),
         child: Column(
@@ -172,7 +165,6 @@ class _EnvanterRaporScreenState extends State<EnvanterRaporScreen>
             LayoutBuilder(
               builder: (context, constraints) {
                 final bool isNarrow = constraints.maxWidth < 420;
-                // responsive yerleşim: dar ekranda Column, genişte Row
 
                 final gunluk = StreamBuilder<Map<String, int>>(
                   stream: _firestoreService.getGunlukGirisCikis(),
@@ -272,14 +264,8 @@ class _EnvanterRaporScreenState extends State<EnvanterRaporScreen>
     );
   }
 
-  // _buildPieChart kaldırıldı
-
-  // Legend kaldırıldı
-  // _buildBarChart kaldırıldı
-
   Widget _buildRecentMovements() {
     return Card(
-      elevation: 4,
       child: Padding(
         padding: EdgeInsets.all(16.0),
         child: Column(
@@ -343,7 +329,6 @@ class _EnvanterRaporScreenState extends State<EnvanterRaporScreen>
 
   Widget _buildDetailedList() {
     return Card(
-      elevation: 4,
       child: Padding(
         padding: EdgeInsets.all(16.0),
         child: Column(

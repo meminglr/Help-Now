@@ -31,8 +31,6 @@ class _EnvanterYonetimScreenState extends State<EnvanterYonetimScreen>
     });
   }
 
-  // kaldırıldı: _addOrUpdateUrun (artık ayrı ekle/güncelle butonları var)
-
   Future<void> _ekleUrun() async {
     if (_urunAdiController.text.isEmpty || _urunMiktarController.text.isEmpty) {
       ScaffoldMessenger.of(
@@ -121,150 +119,253 @@ class _EnvanterYonetimScreenState extends State<EnvanterYonetimScreen>
   Widget build(BuildContext context) {
     super.build(context);
     return Scaffold(
-      appBar: AppBar(title: Text('Depo Yönetimi')),
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: const Text('Depo Yönetimi'),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 0,
+      ),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Depo Doluluk Durumu
             Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Depo Doluluk Durumu',
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                  SizedBox(height: 8),
-                  Text('Toplam Stok: $_totalStok birim'),
-                  SizedBox(height: 16),
-                  StreamBuilder<List<EnvanterItem>>(
-                    stream: _firestoreService.getEnvanter(),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Center(child: CircularProgressIndicator());
-                      }
-                      if (snapshot.hasError) {
-                        return Center(child: Text('Hata: ${snapshot.error}'));
-                      }
-                      if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                        return Center(child: Text('Depoda ürün bulunamadı'));
-                      }
-
-                      final envanter = snapshot.data!;
-                      return Column(
-                        children: envanter.map((item) {
-                          return ListTile(
-                            title: Text('${item.ad} (Stok: ${item.miktar})'),
-                            trailing: IconButton(
-                              icon: Icon(Icons.delete),
-                              onPressed: () async {
-                                try {
-                                  await _firestoreService.updateEnvanterMiktar(
-                                    item.id,
-                                    0,
-                                  );
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text('${item.ad} kaldırıldı'),
-                                    ),
-                                  );
-                                  _calculateTotalStok();
-                                } catch (e) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Hata: $e')),
-                                  );
-                                }
-                              },
-                            ),
-                          );
-                        }).toList(),
-                      );
-                    },
-                  ),
-                ],
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24.0,
+                vertical: 32.0,
               ),
-            ),
-            // Yeni Ürün Ekleme
-            Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Yeni Ürün Ekle / Güncelle',
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                  SizedBox(height: 8),
-                  StreamBuilder<List<String>>(
-                    stream: _firestoreService.getEnvanterAdlari(),
-                    builder: (context, snapshot) {
-                      final suggestions = snapshot.data ?? const <String>[];
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Ürün Adı'),
-                          const SizedBox(height: 8),
-                          Autocomplete<String>(
-                            optionsBuilder: (TextEditingValue value) {
-                              if (value.text.trim().isEmpty) {
-                                return const Iterable<String>.empty();
-                              }
-                              final lower = value.text.toLowerCase();
-                              return suggestions.where(
-                                (s) => s.toLowerCase().contains(lower),
-                              );
-                            },
-                            fieldViewBuilder:
-                                (
-                                  context,
-                                  textController,
-                                  focusNode,
-                                  onFieldSubmitted,
-                                ) {
-                                  return TextField(
-                                    controller: textController,
-                                    focusNode: focusNode,
-                                    decoration: InputDecoration(
-                                      hintText: 'Ürün adı yazın veya seçin',
-                                    ),
-                                    onChanged: (v) {
-                                      _urunAdiController.text = v;
-                                    },
-                                  );
-                                },
-                            onSelected: (String selection) {
-                              _urunAdiController.text = selection;
-                            },
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                  TextField(
-                    controller: _urunMiktarController,
-                    decoration: InputDecoration(labelText: 'Miktar'),
-                    keyboardType: TextInputType.number,
-                  ),
-                  SizedBox(height: 16),
-                  Row(
+              child: Card(
+                elevation: 0,
+                color: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: _ekleUrun,
-                          child: Text('Ekle (Arttır)'),
-                        ),
+                      Text(
+                        'Depo Doluluk Durumu',
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
                       ),
-                      SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: _guncelleUrun,
-                          child: Text('Güncelle (Set Et)'),
-                        ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Toplam Stok: $_totalStok birim',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                      const SizedBox(height: 16),
+                      StreamBuilder<List<EnvanterItem>>(
+                        stream: _firestoreService.getEnvanter(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.blue,
+                              ),
+                            );
+                          }
+                          if (snapshot.hasError) {
+                            return Center(
+                              child: Text(
+                                'Hata: ${snapshot.error}',
+                                style: TextStyle(color: Colors.black54),
+                              ),
+                            );
+                          }
+                          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                            return const Center(
+                              child: Text(
+                                'Depoda ürün bulunamadı',
+                                style: TextStyle(color: Colors.black54),
+                              ),
+                            );
+                          }
+
+                          final envanter = snapshot.data!;
+                          return Column(
+                            children: envanter.map((item) {
+                              return Card(
+                                elevation: 0,
+                                color: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                margin: const EdgeInsets.symmetric(vertical: 6),
+                                child: ListTile(
+                                  title: Text(
+                                    '${item.ad} (Stok: ${item.miktar})',
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.bodyLarge,
+                                  ),
+                                  trailing: IconButton(
+                                    icon: const Icon(
+                                      Icons.delete,
+                                      color: Colors.red,
+                                    ),
+                                    onPressed: () async {
+                                      try {
+                                        await _firestoreService
+                                            .updateEnvanterMiktar(item.id, 0);
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              '${item.ad} kaldırıldı',
+                                            ),
+                                          ),
+                                        );
+                                        _calculateTotalStok();
+                                      } catch (e) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(content: Text('Hata: $e')),
+                                        );
+                                      }
+                                    },
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                          );
+                        },
                       ),
                     ],
                   ),
-                ],
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24.0,
+                vertical: 0.0,
+              ),
+              child: Card(
+                elevation: 0,
+                color: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        'Yeni Ürün Ekle / Güncelle',
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      StreamBuilder<List<String>>(
+                        stream: _firestoreService.getEnvanterAdlari(),
+                        builder: (context, snapshot) {
+                          final suggestions = snapshot.data ?? const <String>[];
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('Ürün Adı'),
+                              const SizedBox(height: 8),
+                              Autocomplete<String>(
+                                optionsBuilder: (TextEditingValue value) {
+                                  if (value.text.trim().isEmpty) {
+                                    return const Iterable<String>.empty();
+                                  }
+                                  final lower = value.text.toLowerCase();
+                                  return suggestions.where(
+                                    (s) => s.toLowerCase().contains(lower),
+                                  );
+                                },
+                                fieldViewBuilder:
+                                    (
+                                      context,
+                                      textController,
+                                      focusNode,
+                                      onFieldSubmitted,
+                                    ) {
+                                      return TextField(
+                                        controller: textController,
+                                        focusNode: focusNode,
+                                        decoration: const InputDecoration(
+                                          hintText: 'Ürün adı yazın veya seçin',
+                                          prefixIcon: Icon(
+                                            Icons.inventory_2_outlined,
+                                          ),
+                                          border: OutlineInputBorder(),
+                                        ),
+                                        onChanged: (v) {
+                                          _urunAdiController.text = v;
+                                        },
+                                      );
+                                    },
+                                onSelected: (String selection) {
+                                  _urunAdiController.text = selection;
+                                },
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: _urunMiktarController,
+                        decoration: const InputDecoration(
+                          labelText: 'Miktar',
+                          prefixIcon: Icon(Icons.numbers),
+                          border: OutlineInputBorder(),
+                        ),
+                        keyboardType: TextInputType.number,
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: FilledButton(
+                              style: FilledButton.styleFrom(
+                                backgroundColor: Theme.of(
+                                  context,
+                                ).colorScheme.primary,
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              onPressed: _ekleUrun,
+                              child: const Text(
+                                'Ekle (Arttır)',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: FilledButton(
+                              style: FilledButton.styleFrom(
+                                backgroundColor: Colors.green,
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              onPressed: _guncelleUrun,
+                              child: const Text(
+                                'Güncelle (Set Et)',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ],

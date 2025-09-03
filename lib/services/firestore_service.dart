@@ -18,7 +18,6 @@ class FirestoreService {
   final CollectionReference _eksikIstekler = FirebaseFirestore.instance
       .collection('eksik_istekler');
 
-  // Envanter işlemleri
   Future<void> addEnvanterItem(EnvanterItem item) async {
     await _envanter.doc(item.id).set(item.toMap());
   }
@@ -36,7 +35,6 @@ class FirestoreService {
     );
   }
 
-  // Envanterde kayıtlı ürün adlarını benzersiz liste olarak döndürür
   Stream<List<String>> getEnvanterAdlari() {
     return _envanter.snapshots().map((snapshot) {
       final names =
@@ -71,7 +69,6 @@ class FirestoreService {
 
       final int degisim = yeniMiktar - eskiMiktar;
       if (degisim != 0) {
-        // Transaction dışında yazmak yerine, aynı transaction içinde ayrı bir koleksiyona yaz
         final hareketRef = _hareketler.doc();
         transaction.set(hareketRef, {
           'itemId': itemId,
@@ -85,7 +82,6 @@ class FirestoreService {
     });
   }
 
-  // Kurumlardan gelen bağış ile envanter artırma/oluşturma
   Future<void> donateEnvanter(String ad, int miktar) async {
     final String normalizedId = _normalizeProductId(ad);
 
@@ -108,7 +104,7 @@ class FirestoreService {
           'miktar': miktar,
         });
       }
-      // Hareket kaydı
+
       final hareketRef = _hareketler.doc();
       transaction.set(hareketRef, {
         'itemId': normalizedId,
@@ -142,7 +138,6 @@ class FirestoreService {
     return s;
   }
 
-  // Envanter hareketleri sorguları
   Stream<Map<String, int>> getGunlukGirisCikis() {
     final DateTime now = DateTime.now();
     final DateTime startOfDay = DateTime(now.year, now.month, now.day);
@@ -289,7 +284,6 @@ class FirestoreService {
               (itemSnapshot.data() as Map<String, dynamic>)['miktar'] as int;
           await updateEnvanterMiktar(entry.key, currentMiktar + entry.value);
         } else {
-          // Ürün yoksa yeni ekle
           await addEnvanterItem(
             EnvanterItem(
               id: entry.key,
@@ -299,17 +293,14 @@ class FirestoreService {
           );
         }
       }
-      // İlgili ihtiyacı tekrar beklemede durumuna al
       await updateIhtiyacDurum(istekId, 'beklemede');
     }
   }
 
-  // Kullanıcı profili güncelleme
   Future<void> updateUserProfile(String uid, Map<String, dynamic> data) async {
     await _users.doc(uid).update(data);
   }
 
-  // Kullanıcı rolleri sayımları: depremzede, gonullu, kurum
   Stream<Map<String, int>> getUserRoleCounts() {
     return _users.snapshots().map((snapshot) {
       int depremzede = 0;

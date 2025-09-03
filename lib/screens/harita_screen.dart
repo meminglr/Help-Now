@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:intl/intl.dart';
 import '../models/ihtiyac.dart';
@@ -107,42 +106,66 @@ class _HaritaScreenState extends State<HaritaScreen>
       stream: _authService.user,
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return Center(child: CircularProgressIndicator());
+          return const Center(
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: Colors.blue,
+            ),
+          );
         }
         final user = snapshot.data!;
         if (user.role == 'depremzede') {
           return Scaffold(
-            body: Center(
-              child: Text('Harita erişimi sadece gönüllü ve kurumlar için'),
+            backgroundColor: Colors.white,
+            body: const Center(
+              child: Text(
+                'Harita erişimi sadece gönüllü ve kurumlar için',
+                style: TextStyle(color: Colors.black),
+              ),
             ),
           );
         }
         return Scaffold(
+          backgroundColor: Colors.white,
           appBar: AppBar(
-            title: Text('İhtiyaç Haritası'),
+            title: const Text('İhtiyaç Haritası'),
+            centerTitle: true,
+            backgroundColor: Colors.white,
+            foregroundColor: Colors.black,
+            elevation: 0,
             actions: [
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.0),
-                child: DropdownButton<String>(
-                  value: _selectedDurum,
-                  items:
-                      [
-                        'Tümü',
-                        'beklemede',
-                        'onaylandı',
-                        'reddedildi',
-                        'yetersiz',
-                      ].map((durum) {
-                        return DropdownMenuItem(
-                          value: durum,
-                          child: Text(durum),
-                        );
-                      }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedDurum = value;
-                    });
-                  },
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: _selectedDurum,
+                    items: const [
+                      DropdownMenuItem(value: 'Tümü', child: Text('Tümü')),
+                      DropdownMenuItem(
+                        value: 'beklemede',
+                        child: Text('Beklemede'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'onaylandı',
+                        child: Text('Onaylandı'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'reddedildi',
+                        child: Text('Reddedildi'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'yetersiz',
+                        child: Text('Yetersiz'),
+                      ),
+                    ],
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedDurum = value;
+                      });
+                    },
+                    style: Theme.of(context).textTheme.bodyMedium,
+                    icon: const Icon(Icons.filter_alt_outlined),
+                  ),
                 ),
               ),
             ],
@@ -152,9 +175,15 @@ class _HaritaScreenState extends State<HaritaScreen>
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      CircularProgressIndicator(),
-                      SizedBox(height: 16),
-                      Text('Harita yükleniyor...'),
+                      const CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.blue,
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Harita yükleniyor...',
+                        style: TextStyle(color: Colors.black),
+                      ),
                     ],
                   ),
                 )
@@ -182,14 +211,18 @@ class _HaritaScreenState extends State<HaritaScreen>
                           ),
                         ),
                         Container(
-                          color: Colors.grey[200],
-                          padding: EdgeInsets.all(8.0),
+                          color: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16.0,
+                            vertical: 8.0,
+                          ),
                           child: TextField(
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               labelText: 'İhtiyaç Ara (Ürün ID veya İsim)',
                               border: OutlineInputBorder(),
                               prefixIcon: Icon(Icons.search),
                             ),
+                            style: Theme.of(context).textTheme.bodyLarge,
                             onChanged: (value) {
                               setState(() {
                                 _searchQuery = value.toLowerCase();
@@ -205,26 +238,41 @@ class _HaritaScreenState extends State<HaritaScreen>
                       maxChildSize: 0.9,
                       builder: (context, scrollController) {
                         return Container(
-                          color: Colors.white,
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.vertical(
+                              top: Radius.circular(16),
+                            ),
+                            boxShadow: [
+                              BoxShadow(color: Colors.black12, blurRadius: 8),
+                            ],
+                          ),
                           child: StreamBuilder<List<Ihtiyac>>(
                             stream: _firestoreService.getIhtiyaclar(),
                             builder: (context, snapshot) {
                               if (snapshot.connectionState ==
                                   ConnectionState.waiting) {
-                                return Center(
-                                  child: CircularProgressIndicator(),
+                                return const Center(
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.blue,
+                                  ),
                                 );
                               }
                               if (snapshot.hasError) {
                                 return Center(
                                   child: Text(
                                     'Veri yükleme hatası: ${snapshot.error}',
+                                    style: TextStyle(color: Colors.black54),
                                   ),
                                 );
                               }
                               if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                                return Center(
-                                  child: Text('İhtiyaç bulunamadı'),
+                                return const Center(
+                                  child: Text(
+                                    'İhtiyaç bulunamadı',
+                                    style: TextStyle(color: Colors.black54),
+                                  ),
                                 );
                               }
 
@@ -300,49 +348,86 @@ class _HaritaScreenState extends State<HaritaScreen>
                                 itemCount: ihtiyaclar.length,
                                 itemBuilder: (context, index) {
                                   final ihtiyac = ihtiyaclar[index];
-                                  return ListTile(
-                                    title: Text(
-                                      'İhtiyaç #${ihtiyac.id} (${ihtiyac.isim} ${ihtiyac.soyisim})',
+                                  return Card(
+                                    elevation: 0,
+                                    color: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
-                                    subtitle: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        ...ihtiyac.urunler.entries.map(
-                                          (e) =>
-                                              Text('${e.key}: ${e.value} adet'),
-                                        ),
-                                        Text('Adres: ${ihtiyac.adresTarifi}'),
-                                        if (ihtiyac.not.isNotEmpty)
-                                          Text('Not: ${ihtiyac.not}'),
-                                        Text(
-                                          'Tarih: ${DateFormat('dd/MM/yyyy').format(ihtiyac.timestamp)}',
-                                        ),
-                                        Text(
-                                          'Saat: ${DateFormat('HH:mm').format(ihtiyac.timestamp)}',
-                                        ),
-                                      ],
+                                    margin: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 6,
                                     ),
-                                    trailing: IconButton(
-                                      icon: Icon(Icons.directions),
-                                      onPressed: () {
-                                        _launchMapDirections(
-                                          ihtiyac.latitude,
-                                          ihtiyac.longitude,
-                                          'İhtiyaç #${ihtiyac.id}',
+                                    child: ListTile(
+                                      title: Text(
+                                        'İhtiyaç #${ihtiyac.id} (${ihtiyac.isim} ${ihtiyac.soyisim})',
+                                        style: Theme.of(
+                                          context,
+                                        ).textTheme.bodyLarge,
+                                      ),
+                                      subtitle: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          ...ihtiyac.urunler.entries.map(
+                                            (e) => Text(
+                                              '${e.key}: ${e.value} adet',
+                                              style: Theme.of(
+                                                context,
+                                              ).textTheme.bodyMedium,
+                                            ),
+                                          ),
+                                          Text(
+                                            'Adres: ${ihtiyac.adresTarifi}',
+                                            style: Theme.of(
+                                              context,
+                                            ).textTheme.bodyMedium,
+                                          ),
+                                          if (ihtiyac.not.isNotEmpty)
+                                            Text(
+                                              'Not: ${ihtiyac.not}',
+                                              style: Theme.of(
+                                                context,
+                                              ).textTheme.bodyMedium,
+                                            ),
+                                          Text(
+                                            'Tarih: ${DateFormat('dd/MM/yyyy').format(ihtiyac.timestamp)}',
+                                            style: Theme.of(
+                                              context,
+                                            ).textTheme.bodySmall,
+                                          ),
+                                          Text(
+                                            'Saat: ${DateFormat('HH:mm').format(ihtiyac.timestamp)}',
+                                            style: Theme.of(
+                                              context,
+                                            ).textTheme.bodySmall,
+                                          ),
+                                        ],
+                                      ),
+                                      trailing: IconButton(
+                                        icon: const Icon(
+                                          Icons.directions,
+                                          color: Colors.blue,
+                                        ),
+                                        onPressed: () {
+                                          _launchMapDirections(
+                                            ihtiyac.latitude,
+                                            ihtiyac.longitude,
+                                            'İhtiyaç #${ihtiyac.id}',
+                                          );
+                                        },
+                                      ),
+                                      onTap: () {
+                                        _mapController?.animateCamera(
+                                          CameraUpdate.newLatLng(
+                                            LatLng(
+                                              ihtiyac.latitude,
+                                              ihtiyac.longitude,
+                                            ),
+                                          ),
                                         );
                                       },
                                     ),
-                                    onTap: () {
-                                      _mapController?.animateCamera(
-                                        CameraUpdate.newLatLng(
-                                          LatLng(
-                                            ihtiyac.latitude,
-                                            ihtiyac.longitude,
-                                          ),
-                                        ),
-                                      );
-                                    },
                                   );
                                 },
                               );
@@ -354,9 +439,11 @@ class _HaritaScreenState extends State<HaritaScreen>
                   ],
                 ),
           floatingActionButton: FloatingActionButton(
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            foregroundColor: Colors.white,
             onPressed: _getUserLocation,
-            child: Icon(Icons.my_location),
             tooltip: 'Konumuma Git',
+            child: const Icon(Icons.my_location),
           ),
         );
       },

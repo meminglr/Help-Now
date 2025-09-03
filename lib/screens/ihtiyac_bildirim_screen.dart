@@ -6,7 +6,6 @@ import '../models/ihtiyac.dart';
 import '../models/envanter.dart';
 import '../services/firestore_service.dart';
 import '../services/auth_service.dart';
-import '../models/user.dart';
 
 class IhtiyacBildirimScreen extends StatefulWidget {
   @override
@@ -103,11 +102,18 @@ class _IhtiyacBildirimScreenState extends State<IhtiyacBildirimScreen>
     final saat = DateFormat('HH:mm').format(now);
 
     return Scaffold(
-      appBar: AppBar(title: Text('İhtiyaç Bildir')),
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: const Text('İhtiyaç Bildir'),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 0,
+      ),
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         child: SingleChildScrollView(
-          padding: EdgeInsets.all(16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
           child: Form(
             key: _formKey,
             child: Column(
@@ -115,8 +121,9 @@ class _IhtiyacBildirimScreenState extends State<IhtiyacBildirimScreen>
               children: [
                 TextFormField(
                   controller: _isimController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'İsim',
+                    prefixIcon: Icon(Icons.person_outline),
                     border: OutlineInputBorder(),
                   ),
                   validator: (value) {
@@ -126,11 +133,12 @@ class _IhtiyacBildirimScreenState extends State<IhtiyacBildirimScreen>
                     return null;
                   },
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 TextFormField(
                   controller: _soyisimController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Soyisim',
+                    prefixIcon: Icon(Icons.person_outline),
                     border: OutlineInputBorder(),
                   ),
                   validator: (value) {
@@ -140,93 +148,164 @@ class _IhtiyacBildirimScreenState extends State<IhtiyacBildirimScreen>
                     return null;
                   },
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 TextFormField(
                   controller: _adresTarifiController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Adres Tarifi (İsteğe bağlı)',
+                    prefixIcon: Icon(Icons.location_on_outlined),
                     border: OutlineInputBorder(),
                   ),
                   maxLines: 3,
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 TextFormField(
                   controller: _notController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Not (İsteğe bağlı)',
+                    prefixIcon: Icon(Icons.note_outlined),
                     border: OutlineInputBorder(),
                   ),
                   maxLines: 3,
                 ),
-                SizedBox(height: 16),
-                Text('Tarih: $tarih'),
-                SizedBox(height: 8),
-                Text('Saat: $saat'),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
+                Text(
+                  'Tarih: $tarih',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Saat: $saat',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 16),
                 Text(
                   'Ürün Seçimi',
-                  style: Theme.of(context).textTheme.headlineSmall,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
+                const SizedBox(height: 8),
                 StreamBuilder<List<EnvanterItem>>(
                   stream: _firestoreService.getEnvanter(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(child: CircularProgressIndicator());
+                      return const Center(
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.blue,
+                        ),
+                      );
                     }
                     if (snapshot.hasError) {
-                      return Center(child: Text('Hata: ${snapshot.error}'));
+                      return Center(
+                        child: Text(
+                          'Hata: ${snapshot.error}',
+                          style: TextStyle(color: Colors.black54),
+                        ),
+                      );
                     }
                     if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return Center(child: Text('Depoda ürün bulunamadı'));
+                      return const Center(
+                        child: Text(
+                          'Depoda ürün bulunamadı',
+                          style: TextStyle(color: Colors.black54),
+                        ),
+                      );
                     }
 
                     final envanter = snapshot.data!;
                     return Column(
                       children: envanter.map((item) {
-                        return ListTile(
-                          title: Text(item.ad),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                icon: Icon(Icons.remove),
-                                onPressed: () {
-                                  setState(() {
-                                    if (_secilenUrunler.containsKey(item.id)) {
-                                      if (_secilenUrunler[item.id]! > 0) {
-                                        _secilenUrunler[item.id] =
-                                            _secilenUrunler[item.id]! - 1;
-                                        if (_secilenUrunler[item.id] == 0) {
-                                          _secilenUrunler.remove(item.id);
+                        return Card(
+                          elevation: 0,
+                          color: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    item.ad,
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.bodyLarge,
+                                  ),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.remove_circle_outline),
+                                  onPressed: () {
+                                    setState(() {
+                                      if (_secilenUrunler.containsKey(
+                                        item.id,
+                                      )) {
+                                        if (_secilenUrunler[item.id]! > 0) {
+                                          _secilenUrunler[item.id] =
+                                              _secilenUrunler[item.id]! - 1;
+                                          if (_secilenUrunler[item.id] == 0) {
+                                            _secilenUrunler.remove(item.id);
+                                          }
                                         }
                                       }
-                                    }
-                                  });
-                                },
-                              ),
-                              Text(_secilenUrunler[item.id]?.toString() ?? '0'),
-                              IconButton(
-                                icon: Icon(Icons.add),
-                                onPressed: () {
-                                  setState(() {
-                                    _secilenUrunler[item.id] =
-                                        (_secilenUrunler[item.id] ?? 0) + 1;
-                                  });
-                                },
-                              ),
-                            ],
+                                    });
+                                  },
+                                ),
+                                Text(
+                                  _secilenUrunler[item.id]?.toString() ?? '0',
+                                  style: Theme.of(context).textTheme.bodyLarge,
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.add_circle_outline),
+                                  onPressed: () {
+                                    setState(() {
+                                      _secilenUrunler[item.id] =
+                                          (_secilenUrunler[item.id] ?? 0) + 1;
+                                    });
+                                  },
+                                ),
+                              ],
+                            ),
                           ),
                         );
                       }).toList(),
                     );
                   },
                 ),
-                SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: _isLoading ? null : _submitIhtiyac,
-                  child: _isLoading
-                      ? CircularProgressIndicator(color: Colors.white)
-                      : Text('İhtiyacı Bildir'),
+                const SizedBox(height: 24),
+                SizedBox(
+                  height: 48,
+                  child: FilledButton(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    onPressed: _isLoading ? null : _submitIhtiyac,
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Text(
+                            'İhtiyacı Bildir',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                  ),
                 ),
               ],
             ),
