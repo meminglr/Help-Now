@@ -1,7 +1,9 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import '../services/firestore_service.dart';
 import '../models/user.dart';
+import 'envanter_rapor_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final void Function(int index)? onNavigateToTab;
@@ -229,8 +231,14 @@ class _HomeScreenState extends State<HomeScreen>
                   InkWell(
                     onTap: () {
                       if (widget.onNavigateToTab != null &&
-                          widget.raporTabIndex != null) {
-                        widget.onNavigateToTab!(widget.raporTabIndex!);
+                          widget.envanterTabIndex != null) {
+                        widget.onNavigateToTab!(widget.envanterTabIndex!);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => EnvanterRaporScreen(),
+                          ),
+                        );
                       }
                     },
                     child: Card(

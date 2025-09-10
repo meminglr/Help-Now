@@ -17,6 +17,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Deprem Yardım Uygulaması',
       theme: ThemeData(
+        fontFamily: 'Poppins',
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.blue,
@@ -28,6 +29,7 @@ class MyApp extends StatelessWidget {
           backgroundColor: Colors.white,
           foregroundColor: Colors.black,
           elevation: 0,
+          scrolledUnderElevation: 0,
           titleTextStyle: TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.bold,

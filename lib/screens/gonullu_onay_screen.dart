@@ -174,6 +174,7 @@ class _GonulluOnayScreenState extends State<GonulluOnayScreen>
                   .where((i) => i.durum == 'beklemede' || i.durum == 'yetersiz')
                   .toList();
               return ListView.builder(
+                physics: const BouncingScrollPhysics(),
                 itemCount: ihtiyaclar.length,
                 itemBuilder: (context, index) {
                   final ihtiyac = ihtiyaclar[index];
@@ -194,128 +195,192 @@ class _GonulluOnayScreenState extends State<GonulluOnayScreen>
                     }
                   }
 
-                  return Card(
-                    elevation: 0,
-                    color: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
+                  return SizedBox(
+                    height: 200,
                     child: Padding(
-                      padding: const EdgeInsets.all(20),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 6,
+                      ),
                       child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        spacing: 5,
                         children: [
                           Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'İhtiyaç #${ihtiyac.id} (${ihtiyac.isim} ${ihtiyac.soyisim})',
-                                  style: Theme.of(context).textTheme.titleMedium
-                                      ?.copyWith(fontWeight: FontWeight.bold),
+                            flex: 4,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.grey[100],
+                                borderRadius: BorderRadius.horizontal(
+                                  left: Radius.circular(20),
+                                  right: Radius.circular(5),
                                 ),
-                                const SizedBox(height: 6),
-                                ...ihtiyac.urunler.entries.map(
-                                  (e) => Text(
-                                    '${e.key}: ${e.value} adet',
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.bodyMedium,
-                                  ),
-                                ),
-                                const SizedBox(height: 6),
-                                Text(
-                                  'Adres: ${ihtiyac.adresTarifi}',
-                                  style: Theme.of(context).textTheme.bodyMedium,
-                                ),
-                                if (ihtiyac.not.isNotEmpty)
-                                  Text(
-                                    'Not: ${ihtiyac.not}',
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.bodyMedium,
-                                  ),
-                                const SizedBox(height: 6),
-                                Row(
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Text(
-                                      'Tarih: ${DateFormat('dd/MM/yyyy').format(ihtiyac.timestamp)}',
-                                      style: Theme.of(
-                                        context,
-                                      ).textTheme.bodySmall,
+                                      'İhtiyaç (${ihtiyac.isim} ${ihtiyac.soyisim})',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                     ),
-                                    const SizedBox(width: 12),
+                                    const SizedBox(height: 6),
+                                    ...ihtiyac.urunler.entries.map(
+                                      (e) => Text(
+                                        '${e.key}: ${e.value} adet',
+                                        style: Theme.of(
+                                          context,
+                                        ).textTheme.bodyMedium,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 6),
                                     Text(
-                                      'Saat: ${DateFormat('HH:mm').format(ihtiyac.timestamp)}',
+                                      'Adres: ${ihtiyac.adresTarifi}',
                                       style: Theme.of(
                                         context,
-                                      ).textTheme.bodySmall,
+                                      ).textTheme.bodyMedium,
+                                    ),
+                                    if (ihtiyac.not.isNotEmpty)
+                                      Text(
+                                        'Not: ${ihtiyac.not}',
+                                        style: Theme.of(
+                                          context,
+                                        ).textTheme.bodyMedium,
+                                      ),
+                                    const SizedBox(height: 6),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          'Tarih: ${DateFormat('dd/MM/yyyy').format(ihtiyac.timestamp)}',
+                                          style: Theme.of(
+                                            context,
+                                          ).textTheme.bodySmall,
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Text(
+                                          'Saat: ${DateFormat('HH:mm').format(ihtiyac.timestamp)}',
+                                          style: Theme.of(
+                                            context,
+                                          ).textTheme.bodySmall,
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),
-                              ],
+                              ),
                             ),
                           ),
-                          ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 160),
+                          Expanded(
+                            flex: 2,
                             child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
-                                FilledButton.icon(
-                                  style: FilledButton.styleFrom(
-                                    backgroundColor: Colors.green,
-                                    foregroundColor: Colors.white,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap: () => _onayIhtiyac(ihtiyac),
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.green,
+                                        borderRadius: BorderRadius.only(
+                                          topRight: Radius.circular(20),
+                                          topLeft: Radius.circular(5),
+                                        ),
+                                      ),
+                                      child: Row(
+                                        spacing: 5,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.check,
+                                            size: 18,
+                                            color: Colors.green[100],
+                                          ),
+                                          Text(
+                                            'Onayla',
+                                            style: TextStyle(
+                                              color: Colors.green[100],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                    ),
-                                    minimumSize: const Size(0, 40),
                                   ),
-                                  icon: const Icon(Icons.check, size: 18),
-                                  label: const Text('Onayla'),
-                                  onPressed: () => _onayIhtiyac(ihtiyac),
                                 ),
-                                const SizedBox(height: 8),
-                                FilledButton.icon(
-                                  style: FilledButton.styleFrom(
-                                    backgroundColor: Colors.red,
-                                    foregroundColor: Colors.white,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap: () => _reddetIhtiyac(ihtiyac),
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.red,
+                                        borderRadius: BorderRadius.only(
+                                          bottomRight: hasMissing
+                                              ? Radius.circular(0)
+                                              : Radius.circular(20),
+                                          bottomLeft: hasMissing
+                                              ? Radius.circular(0)
+                                              : Radius.circular(5),
+                                        ),
+                                      ),
+                                      child: Row(
+                                        spacing: 5,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.close,
+                                            size: 18,
+                                            color: Colors.red[100],
+                                          ),
+                                          Text(
+                                            'Reddet',
+                                            style: TextStyle(
+                                              color: Colors.red[100],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                    ),
-                                    minimumSize: const Size(0, 40),
                                   ),
-                                  icon: const Icon(Icons.close, size: 18),
-                                  label: const Text('Reddet'),
-                                  onPressed: () => _reddetIhtiyac(ihtiyac),
                                 ),
-                                const SizedBox(height: 8),
+
                                 if (hasMissing)
-                                  FilledButton.icon(
-                                    style: FilledButton.styleFrom(
-                                      backgroundColor: Colors.blue,
-                                      foregroundColor: Colors.white,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8),
+                                  Expanded(
+                                    child: GestureDetector(
+                                      onTap: () => _kurumdanIste(ihtiyac),
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          color: Colors.blue,
+                                          borderRadius: BorderRadius.only(
+                                            bottomRight: Radius.circular(20),
+                                            bottomLeft: Radius.circular(8),
+                                          ),
+                                        ),
+                                        child: Row(
+                                          spacing: 5,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              Icons.send,
+                                              size: 18,
+                                              color: Colors.blue[100],
+                                            ),
+                                            Text(
+                                              'Bildir',
+                                              style: TextStyle(
+                                                color: Colors.blue[100],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                      ),
-                                      minimumSize: const Size(0, 40),
                                     ),
-                                    icon: const Icon(Icons.send, size: 18),
-                                    label: const Text('Kurumdan iste'),
-                                    onPressed: () => _kurumdanIste(ihtiyac),
                                   ),
                               ],
                             ),

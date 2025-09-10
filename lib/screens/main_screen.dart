@@ -8,7 +8,6 @@ import 'kurum_yonetim_screen.dart';
 import 'profile_screen.dart';
 import 'gonullu_onay_screen.dart';
 import 'envanter_yonetim_screen.dart';
-import 'envanter_rapor_screen.dart';
 
 class MainScreen extends StatefulWidget {
   @override
@@ -50,7 +49,6 @@ class _MainScreenState extends State<MainScreen> {
           if (user.role != 'depremzede') HaritaScreen(),
           if (user.role == 'gonullu') GonulluOnayScreen(),
           if (user.role == 'gonullu') EnvanterYonetimScreen(),
-          if (user.role == 'gonullu') EnvanterRaporScreen(),
           if (user.role == 'kurum') KurumYonetimScreen(),
           ProfileScreen(),
         ];
@@ -70,11 +68,7 @@ class _MainScreenState extends State<MainScreen> {
             ),
           if (user.role == 'gonullu')
             BottomNavigationBarItem(icon: Icon(Icons.inventory), label: 'Depo'),
-          if (user.role == 'gonullu')
-            BottomNavigationBarItem(
-              icon: Icon(Icons.analytics),
-              label: 'Rapor',
-            ),
+
           if (user.role == 'kurum')
             BottomNavigationBarItem(
               icon: Icon(Icons.admin_panel_settings),
@@ -175,7 +169,6 @@ class _MainScreenState extends State<MainScreen> {
               ),
             )
             .toList(),
-        indicatorColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
       ),
     );
