@@ -53,7 +53,10 @@ class _MainScreenState extends State<MainScreen> {
           ProfileScreen(),
         ];
         _items = [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Ana Sayfa'),
+          if (user.role == 'depremzede' ||
+              user.role == 'gonullu' ||
+              user.role == 'kurum')
+            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Ana Sayfa'),
           if (user.role == 'depremzede')
             BottomNavigationBarItem(
               icon: Icon(Icons.add_alert),

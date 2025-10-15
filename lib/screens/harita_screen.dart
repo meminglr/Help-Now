@@ -403,6 +403,8 @@ class _HaritaScreenState extends State<HaritaScreen>
                                             children: [
                                               Expanded(
                                                 child: ListView.builder(
+                                                  physics:
+                                                      BouncingScrollPhysics(),
                                                   controller: scrollController,
                                                   itemCount: ihtiyaclar.length,
                                                   itemBuilder: (context, index) {

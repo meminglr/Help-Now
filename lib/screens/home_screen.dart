@@ -51,7 +51,8 @@ class _HomeScreenState extends State<HomeScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Card(
+                Material(
+                  borderRadius: BorderRadius.circular(15),
                   child: Padding(
                     padding: EdgeInsets.all(16),
                     child: Column(
@@ -64,7 +65,8 @@ class _HomeScreenState extends State<HomeScreen>
                   ),
                 ),
                 SizedBox(height: 12),
-                Card(
+                Material(
+                  borderRadius: BorderRadius.circular(15),
                   child: Padding(
                     padding: EdgeInsets.all(16),
                     child: Column(
@@ -115,14 +117,15 @@ class _HomeScreenState extends State<HomeScreen>
                 ),
                 if (user.role == 'gonullu') ...[
                   SizedBox(height: 12),
-                  InkWell(
+                  GestureDetector(
                     onTap: () {
                       if (widget.onNavigateToTab != null &&
                           widget.gonulluOnayTabIndex != null) {
                         widget.onNavigateToTab!(widget.gonulluOnayTabIndex!);
                       }
                     },
-                    child: Card(
+                    child: Material(
+                      borderRadius: BorderRadius.circular(15),
                       child: Padding(
                         padding: EdgeInsets.all(16),
                         child: Row(
@@ -170,14 +173,15 @@ class _HomeScreenState extends State<HomeScreen>
                     ),
                   ),
                   SizedBox(height: 12),
-                  InkWell(
+                  GestureDetector(
                     onTap: () {
                       if (widget.onNavigateToTab != null &&
                           widget.envanterTabIndex != null) {
                         widget.onNavigateToTab!(widget.envanterTabIndex!);
                       }
                     },
-                    child: Card(
+                    child: Material(
+                      borderRadius: BorderRadius.circular(15),
                       child: Padding(
                         padding: EdgeInsets.all(16),
                         child: Row(
@@ -228,7 +232,7 @@ class _HomeScreenState extends State<HomeScreen>
                     ),
                   ),
                   SizedBox(height: 12),
-                  InkWell(
+                  GestureDetector(
                     onTap: () {
                       if (widget.onNavigateToTab != null &&
                           widget.envanterTabIndex != null) {
@@ -241,7 +245,8 @@ class _HomeScreenState extends State<HomeScreen>
                         );
                       }
                     },
-                    child: Card(
+                    child: Material(
+                      borderRadius: BorderRadius.circular(15),
                       child: Padding(
                         padding: EdgeInsets.all(16),
                         child: Row(

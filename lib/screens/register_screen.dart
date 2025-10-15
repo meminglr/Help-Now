@@ -200,7 +200,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     const SizedBox(height: 8),
                     TextButton(
-                      onPressed: () => Navigator.pushNamed(context, '/login'),
+                      onPressed: () => Navigator.pop(context, '/login'),
                       child: const Text('Zaten hesabınız var mı? Giriş yap'),
                     ),
                   ],
