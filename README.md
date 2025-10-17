@@ -17,10 +17,21 @@ Help Now, deprem durumlarında yardım koordinasyonunu kolaylaştırmak için ge
 - Firebase (Authentication, Cloud Firestore)
 - Google Maps Flutter
 - Geolocator
-- Flutter Riverpod
 - URL Launcher
 
-## Başlangıç
+## Ekran Görüntüleri
+
+<p float="left">
+  <img src="screenshots/1.png" width="200" />
+  <img src="screenshots/2.png" width="200" />
+  <img src="screenshots/3.png" width="200" />
+  <img src="screenshots/9.png" width="200" />
+  <img src="screenshots/8.png" width="200" />
+  <img src="screenshots/4.png" width="200" />
+  <img src="screenshots/5.png" width="200" />
+  <img src="screenshots/6.png" width="200" />
+  <img src="screenshots/7.png" width="200" />
+</p>
 
 ### Gereksinimler
 
@@ -69,43 +80,3 @@ Bu proje [MIT lisansı](LICENSE) altında lisanslanmıştır.
 ## İletişim
 
 Emin Güler - [@meminglr](https://github.com/meminglr)
-
-## Ekran Görüntüleri
-
-Aşağıda uygulamadan bazı ekran görüntüleri bulunmaktadır. Görseller `screenshots/` klasöründe yer almaktadır.
-
-- Ana ekran
-
-![Home](screenshots/home.png)
-
-- Giriş ekranı
-
-![Login](screenshots/login.png)
-
-- İhtiyaç bildirim oluşturma
-
-![İhtiyaç Bildir](screenshots/ihtiyac_bildir.png)
-
-- Harita görünümü
-
-![Map](screenshots/map.png)
-
-- Profil
-
-![Profile](screenshots/profile.png)
-
-- Depo yönetimi
-
-![Depo](screenshots/depo.png)
-
-- Bağış ekranı
-
-![Donate](screenshots/donate.png)
-
-- Raporlar
-
-![Rapor](screenshots/rapor.png)
-
-- Onay/İşlem ekranı
-
-![Onay](screenshots/onay.png)
