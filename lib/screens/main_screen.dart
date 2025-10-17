@@ -38,14 +38,15 @@ class _MainScreenState extends State<MainScreen> {
       setState(() {
         _user = user;
         _screens = [
-          HomeScreen(
-            onNavigateToTab: (int index) {
-              setState(() {
-                _selectedIndex = index;
-              });
-            },
-          ),
           if (user.role == 'depremzede') IhtiyacBildirimScreen(),
+          if (user.role != 'depremzede')
+            HomeScreen(
+              onNavigateToTab: (int index) {
+                setState(() {
+                  _selectedIndex = index;
+                });
+              },
+            ),
           if (user.role != 'depremzede') HaritaScreen(),
           if (user.role == 'gonullu') GonulluOnayScreen(),
           if (user.role == 'gonullu') EnvanterYonetimScreen(),
@@ -53,15 +54,13 @@ class _MainScreenState extends State<MainScreen> {
           ProfileScreen(),
         ];
         _items = [
-          if (user.role == 'depremzede' ||
-              user.role == 'gonullu' ||
-              user.role == 'kurum')
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Ana Sayfa'),
           if (user.role == 'depremzede')
             BottomNavigationBarItem(
               icon: Icon(Icons.add_alert),
               label: 'İhtiyaç Bildir',
             ),
+          if (user.role != 'depremzede')
+            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Ana Sayfa'),
           if (user.role != 'depremzede')
             BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Harita'),
           if (user.role == 'gonullu')
@@ -71,7 +70,6 @@ class _MainScreenState extends State<MainScreen> {
             ),
           if (user.role == 'gonullu')
             BottomNavigationBarItem(icon: Icon(Icons.inventory), label: 'Depo'),
-
           if (user.role == 'kurum')
             BottomNavigationBarItem(
               icon: Icon(Icons.admin_panel_settings),

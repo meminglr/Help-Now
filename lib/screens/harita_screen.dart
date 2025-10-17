@@ -403,14 +403,14 @@ class _HaritaScreenState extends State<HaritaScreen>
                                             children: [
                                               Expanded(
                                                 child: ListView.builder(
-                                                  physics:
-                                                      BouncingScrollPhysics(),
                                                   controller: scrollController,
                                                   itemCount: ihtiyaclar.length,
                                                   itemBuilder: (context, index) {
                                                     final ihtiyac =
                                                         ihtiyaclar[index];
                                                     return Card(
+                                                      elevation: 0,
+                                                      color: Colors.grey[100],
                                                       child: ListTile(
                                                         title: Text(
                                                           'İhtiyaç (${ihtiyac.isim} ${ihtiyac.soyisim})',
@@ -470,6 +470,7 @@ class _HaritaScreenState extends State<HaritaScreen>
                                                           ],
                                                         ),
                                                         trailing: IconButton(
+                                                          iconSize: 40,
                                                           icon: const Icon(
                                                             Icons.directions,
                                                             color: Colors.blue,

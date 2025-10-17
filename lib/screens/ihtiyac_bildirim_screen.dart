@@ -8,6 +8,8 @@ import '../services/firestore_service.dart';
 import '../services/auth_service.dart';
 
 class IhtiyacBildirimScreen extends StatefulWidget {
+  const IhtiyacBildirimScreen({super.key});
+
   @override
   _IhtiyacBildirimScreenState createState() => _IhtiyacBildirimScreenState();
 }
@@ -103,6 +105,20 @@ class _IhtiyacBildirimScreenState extends State<IhtiyacBildirimScreen>
 
     return Scaffold(
       backgroundColor: Colors.white,
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _isLoading ? null : _submitIhtiyac,
+        label: _isLoading
+            ? const SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              )
+            : const Text('İhtiyaç Bildir'),
+        icon: _isLoading ? null : const Icon(Icons.send),
+      ),
       appBar: AppBar(
         title: const Text('İhtiyaç Bildir'),
         centerTitle: true,
@@ -119,66 +135,6 @@ class _IhtiyacBildirimScreenState extends State<IhtiyacBildirimScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                TextFormField(
-                  controller: _isimController,
-                  decoration: const InputDecoration(
-                    labelText: 'İsim',
-                    prefixIcon: Icon(Icons.person_outline),
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'İsim gerekli';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _soyisimController,
-                  decoration: const InputDecoration(
-                    labelText: 'Soyisim',
-                    prefixIcon: Icon(Icons.person_outline),
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Soyisim gerekli';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _adresTarifiController,
-                  decoration: const InputDecoration(
-                    labelText: 'Adres Tarifi (İsteğe bağlı)',
-                    prefixIcon: Icon(Icons.location_on_outlined),
-                    border: OutlineInputBorder(),
-                  ),
-                  maxLines: 3,
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _notController,
-                  decoration: const InputDecoration(
-                    labelText: 'Not (İsteğe bağlı)',
-                    prefixIcon: Icon(Icons.note_outlined),
-                    border: OutlineInputBorder(),
-                  ),
-                  maxLines: 3,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Tarih: $tarih',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Saat: $saat',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                const SizedBox(height: 16),
                 Text(
                   'Ürün Seçimi',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -277,35 +233,65 @@ class _IhtiyacBildirimScreenState extends State<IhtiyacBildirimScreen>
                     );
                   },
                 ),
-                const SizedBox(height: 24),
-                SizedBox(
-                  height: 48,
-                  child: FilledButton(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    onPressed: _isLoading ? null : _submitIhtiyac,
-                    child: _isLoading
-                        ? const SizedBox(
-                            height: 24,
-                            width: 24,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
-                        : const Text(
-                            'İhtiyacı Bildir',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+
+                TextFormField(
+                  controller: _isimController,
+                  decoration: const InputDecoration(
+                    labelText: 'İsim',
+                    prefixIcon: Icon(Icons.person_outline),
+                    border: OutlineInputBorder(),
                   ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'İsim gerekli';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _soyisimController,
+                  decoration: const InputDecoration(
+                    labelText: 'Soyisim',
+                    prefixIcon: Icon(Icons.person_outline),
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Soyisim gerekli';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _adresTarifiController,
+                  decoration: const InputDecoration(
+                    labelText: 'Adres Tarifi (İsteğe bağlı)',
+                    prefixIcon: Icon(Icons.location_on_outlined),
+                    border: OutlineInputBorder(),
+                  ),
+                  maxLines: 3,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _notController,
+                  decoration: const InputDecoration(
+                    labelText: 'Not (İsteğe bağlı)',
+                    prefixIcon: Icon(Icons.note_outlined),
+                    border: OutlineInputBorder(),
+                  ),
+                  maxLines: 3,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Tarih: $tarih',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Saat: $saat',
+                  style: Theme.of(context).textTheme.bodyMedium,
                 ),
               ],
             ),

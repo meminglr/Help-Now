@@ -195,205 +195,179 @@ class _GonulluOnayScreenState extends State<GonulluOnayScreen>
                     }
                   }
 
-                  return SizedBox(
-                    height: 200,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 6,
-                      ),
-                      child: Row(
-                        spacing: 5,
-                        children: [
-                          Expanded(
-                            flex: 4,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.grey[100],
-                                borderRadius: BorderRadius.horizontal(
-                                  left: Radius.circular(20),
-                                  right: Radius.circular(5),
-                                ),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      'İhtiyaç (${ihtiyac.isim} ${ihtiyac.soyisim})',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleMedium
-                                          ?.copyWith(
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                    ),
-                                    const SizedBox(height: 6),
-                                    ...ihtiyac.urunler.entries.map(
-                                      (e) => Text(
-                                        '${e.key}: ${e.value} adet',
-                                        style: Theme.of(
-                                          context,
-                                        ).textTheme.bodyMedium,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 6),
-                                    Text(
-                                      'Adres: ${ihtiyac.adresTarifi}',
-                                      style: Theme.of(
-                                        context,
-                                      ).textTheme.bodyMedium,
-                                    ),
-                                    if (ihtiyac.not.isNotEmpty)
-                                      Text(
-                                        'Not: ${ihtiyac.not}',
-                                        style: Theme.of(
-                                          context,
-                                        ).textTheme.bodyMedium,
-                                      ),
-                                    const SizedBox(height: 6),
-                                    Row(
-                                      children: [
-                                        Text(
-                                          'Tarih: ${DateFormat('dd/MM/yyyy').format(ihtiyac.timestamp)}',
-                                          style: Theme.of(
-                                            context,
-                                          ).textTheme.bodySmall,
-                                        ),
-                                        const SizedBox(width: 12),
-                                        Text(
-                                          'Saat: ${DateFormat('HH:mm').format(ihtiyac.timestamp)}',
-                                          style: Theme.of(
-                                            context,
-                                          ).textTheme.bodySmall,
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            flex: 2,
-                            child: Column(
-                              children: [
-                                Expanded(
-                                  child: GestureDetector(
-                                    onTap: () => _onayIhtiyac(ihtiyac),
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color: Colors.green,
-                                        borderRadius: BorderRadius.only(
-                                          topRight: Radius.circular(20),
-                                          topLeft: Radius.circular(5),
-                                        ),
-                                      ),
-                                      child: Row(
-                                        spacing: 5,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Icon(
-                                            Icons.check,
-                                            size: 18,
-                                            color: Colors.green[100],
-                                          ),
-                                          Text(
-                                            'Onayla',
-                                            style: TextStyle(
-                                              color: Colors.green[100],
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: GestureDetector(
-                                    onTap: () => _reddetIhtiyac(ihtiyac),
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color: Colors.red,
-                                        borderRadius: BorderRadius.only(
-                                          bottomRight: hasMissing
-                                              ? Radius.circular(0)
-                                              : Radius.circular(20),
-                                          bottomLeft: hasMissing
-                                              ? Radius.circular(0)
-                                              : Radius.circular(5),
-                                        ),
-                                      ),
-                                      child: Row(
-                                        spacing: 5,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Icon(
-                                            Icons.close,
-                                            size: 18,
-                                            color: Colors.red[100],
-                                          ),
-                                          Text(
-                                            'Reddet',
-                                            style: TextStyle(
-                                              color: Colors.red[100],
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-
-                                if (hasMissing)
-                                  Expanded(
-                                    child: GestureDetector(
-                                      onTap: () => _kurumdanIste(ihtiyac),
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          color: Colors.blue,
-                                          borderRadius: BorderRadius.only(
-                                            bottomRight: Radius.circular(20),
-                                            bottomLeft: Radius.circular(8),
-                                          ),
-                                        ),
-                                        child: Row(
-                                          spacing: 5,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Icon(
-                                              Icons.send,
-                                              size: 18,
-                                              color: Colors.blue[100],
-                                            ),
-                                            Text(
-                                              'Bildir',
-                                              style: TextStyle(
-                                                color: Colors.blue[100],
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
+                  return ihtiyacList(ihtiyac, context, hasMissing);
                 },
               );
             },
           );
         },
+      ),
+    );
+  }
+
+  SizedBox ihtiyacList(Ihtiyac ihtiyac, BuildContext context, bool hasMissing) {
+    return SizedBox(
+      height: 200,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 6),
+        child: Row(
+          spacing: 5,
+          children: [
+            Expanded(
+              flex: 4,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.horizontal(
+                    left: Radius.circular(20),
+                    right: Radius.circular(5),
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'İhtiyaç (${ihtiyac.isim} ${ihtiyac.soyisim})',
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 6),
+                      ...ihtiyac.urunler.entries.map(
+                        (e) => Text(
+                          '${e.key}: ${e.value} adet',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        'Adres: ${ihtiyac.adresTarifi}',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                      if (ihtiyac.not.isNotEmpty)
+                        Text(
+                          'Not: ${ihtiyac.not}',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          Text(
+                            'Tarih: ${DateFormat('dd/MM/yyyy').format(ihtiyac.timestamp)}',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            'Saat: ${DateFormat('HH:mm').format(ihtiyac.timestamp)}',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 2,
+              child: Column(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => _onayIhtiyac(ihtiyac),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.green,
+                          borderRadius: BorderRadius.only(
+                            topRight: Radius.circular(20),
+                            topLeft: Radius.circular(5),
+                          ),
+                        ),
+                        child: Row(
+                          spacing: 5,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.check,
+                              size: 18,
+                              color: Colors.green[100],
+                            ),
+                            Text(
+                              'Onayla',
+                              style: TextStyle(color: Colors.green[100]),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => _reddetIhtiyac(ihtiyac),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.only(
+                            bottomRight: hasMissing
+                                ? Radius.circular(0)
+                                : Radius.circular(20),
+                            bottomLeft: hasMissing
+                                ? Radius.circular(0)
+                                : Radius.circular(5),
+                          ),
+                        ),
+                        child: Row(
+                          spacing: 5,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.close, size: 18, color: Colors.red[100]),
+                            Text(
+                              'Reddet',
+                              style: TextStyle(color: Colors.red[100]),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  if (hasMissing)
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => _kurumdanIste(ihtiyac),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.blue,
+                            borderRadius: BorderRadius.only(
+                              bottomRight: Radius.circular(20),
+                              bottomLeft: Radius.circular(8),
+                            ),
+                          ),
+                          child: Row(
+                            spacing: 5,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.send,
+                                size: 18,
+                                color: Colors.blue[100],
+                              ),
+                              Text(
+                                'Bildir',
+                                style: TextStyle(color: Colors.blue[100]),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

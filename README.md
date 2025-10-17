@@ -69,3 +69,43 @@ Bu proje [MIT lisansı](LICENSE) altında lisanslanmıştır.
 ## İletişim
 
 Emin Güler - [@meminglr](https://github.com/meminglr)
+
+## Ekran Görüntüleri
+
+Aşağıda uygulamadan bazı ekran görüntüleri bulunmaktadır. Görseller `screenshots/` klasöründe yer almaktadır.
+
+- Ana ekran
+
+![Home](screenshots/home.png)
+
+- Giriş ekranı
+
+![Login](screenshots/login.png)
+
+- İhtiyaç bildirim oluşturma
+
+![İhtiyaç Bildir](screenshots/ihtiyac_bildir.png)
+
+- Harita görünümü
+
+![Map](screenshots/map.png)
+
+- Profil
+
+![Profile](screenshots/profile.png)
+
+- Depo yönetimi
+
+![Depo](screenshots/depo.png)
+
+- Bağış ekranı
+
+![Donate](screenshots/donate.png)
+
+- Raporlar
+
+![Rapor](screenshots/rapor.png)
+
+- Onay/İşlem ekranı
+
+![Onay](screenshots/onay.png)
